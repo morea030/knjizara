@@ -18,6 +18,9 @@
 					{% else %}
 						{{comment.body}}
 					{% endif %}
+					{% if comment.parrent_id %}
+						@ {{comment.parrent_id}}
+					{% endif %}	
 
 				{% endif %}	
 			</div>	

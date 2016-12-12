@@ -161,10 +161,18 @@ def post(id):
     return render_template('post.html', posts=[post], form = form,
         comments=comments, pagination=pagination)
 
-@main.route('/comment/<int:id>')
+@main.route('/comment/<int:id>', methods=['POST','GET'])
 def comment(id):
-    comment = Comment.query.filter_by(id = id).first()
-    return comment.body, comment.author.username
+    parrent_comment = Comment.query.filter_by(id = id).first()
+    post = Post.query.filter_by(id=parrent_comment.post_id).first()
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data, post=post, author = current_user._get_current_object(), parrent_id=parrent_comment.id)
+        db.session.add(comment)
+        flash('Your comment has been added')
+        return redirect(url_for('.post', id=post.id))
+
+    return render_template('comments.html', form=form, parrent = parrent_comment)
 
 
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])

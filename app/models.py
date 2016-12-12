@@ -373,6 +373,7 @@ class Comment(db.Model):
     disabled = db.Column(db.Boolean)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+    parrent_id = db.Column(db.Integer)
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):

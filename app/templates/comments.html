@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block page_content %}
+<ul>
+<li class="post">
+    <div class="profile-thumbnail">
+        <a href="{{ url_for('.user', username=parrent.author.username) }}">
+            <img class="img-rounded profile-thumbnail" style="width: 40px; height: 40px"
+                 src="{{ parrent.author.gravatar(size=40) }}">
+        </a>
+    </div>
+    <div class="post-date">{{ moment(parrent.timestamp).fromNow(refresh=True) }}</div>
+    <div class="post-author">
+        <a href="{{ url_for('.user', username=parrent.author.username) }}">
+            {{ parrent.author.username }}
+        </a>
+    </div>
+    <div class="post-body">
+        {% if parrent.body_html %}
+            {{ parrent.body_html | safe }}
+        {% else %}
+            {{ parrent.body }}
+        {% endif %}
+    </div >
+</li>
+</ul>
+
+{{wtf.quick_form(form)}}
+
+{% endblock %}
