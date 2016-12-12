@@ -1,0 +1,10 @@
+<p>Poštovani {{ name.username }},</p>
+<p>Dobrodošli na <b>BookSpaces</b>!</p>
+<p>Da bi ste kompletirali vašu registraciju kliknite
+    na
+    <a href="{{ url_for('auth.confirm', token=token, _external=True) }}">ovaj link</a>.</p>
+<p>Ili, ukoliko Vam je lakše, prekopirajte ovaj link u vašem browsveru</p>
+<p>{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+<p>Vaš,</p>
+<p>BookSpaces tim</p>
+<p><small>Na ovaj mejl ne treba da odgovarate</small></p>

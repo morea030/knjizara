@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Knjižara - Potvrdite vaš nalog{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>
+        Zdravo, {{ current_user.username }}
+    </h1>
+    <h3>Niste potvrdili registraciju vašeg naloga</h3>
+    <p>Da bi stre pristupili ovom odeljku
+    morate prethodno da verifikujete vaš nalog.
+    Proverite vaš inbox, trebalo bi da ste dobili mejl
+    sa konfirmacionim linkom</p>
+    <p>Ukoliko želite da Vam ponovo pošaljemo konfirmacioni mejl
+    <a href="{{ url_for('auth.resend_confirmation') }}">
+        Kliknite ovde</a></p>
+</div>
+{% endblock %}

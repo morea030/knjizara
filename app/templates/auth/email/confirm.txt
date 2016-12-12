@@ -1,0 +1,9 @@
+Poštovani {{name.username }},
+
+Dobrodošli na BookSpaces!
+
+Da bi ste potvrdili kreiranje vašeg naloga molimo kliknite na sledeći link
+
+{{ url_for('auth.confirm', token = token, external=True) }}
+
+Vaš BookSpaces tim

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+    {{ super() }}
+    {% if p_title %}
+        Knjižara {{p_title}}
+    {% else %}
+     Knjizara
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="shorcut icon" href = "{{ url_for('static', filename='img/book-icon.ico') }}"
+      type = "image/x-icon">
+<link rel="icon" href = "{{ url_for('static', filename='img/book-icon.png') }}"
+      type = "image/x-icon">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+    {{ moment.lang('sr')}}
+{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle"
+            data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Knjižara</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ current_user.gravatar(size=18) }}" style="width:24px;height:24px;">
+                        Account<b class="caret"></b>
+                    </a>
+{#                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Account <b class="caret"></b></a>#}
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('main.user', username = current_user.username) }}">Profile</a> </li>
+
+                        <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
+                        <li><a href="{{ url_for('auth.change_email_request') }}">Change email</a> </li>
+                        <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+
+                    </ul>
+                    </li>
+                {% else %}
+                <li>
+                    <a href="{{ url_for('auth.login') }}"> Sign In</a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+{% for message in get_flashed_messages() %}
+    <div class = "alert alert-warning">
+        <button type ="button" class = "close" data-dismiss="alert">&times;</button>
+        {{ message }}
+
+    </div>
+{% endfor %}
+{% block page_content %}{% endblock %}
+</div>
+{% endblock %}
+
+
+{##}
+{#    <meta charset="UTF-8">#}
+{#    {% if title %}#}
+{#    <title>Knjižara - {{title}}</title>#}
+{#    {% else %}#}
+{#    <title>Knjižara</title>#}
+{#    {% endif %}#}
+{##}
+{#</head>#}
+{#<body>#}
+{#<div><a href="/index">Knjižara</a> </div>#}
+{#<hr>#}
+{#{% with messages = get_flashed_messages() %} <!-- sets messages within with scope, they are not seen outside of it -->#}
+{#    {% if messages %}#}
+{#         <ul>#}
+{#        {% for message in messages %}#}
+{#            <li>{{ message }}</li>#}
+{#        {% endfor %}#}
+{#         </ul>#}
+{#    {% endif %}#}
+{#{% endwith %}#}
+{##}
+{#{% block content %} {% endblock %}#}
+{#</body>#}
+{#</html>#}
