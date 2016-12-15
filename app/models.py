@@ -373,7 +373,8 @@ class Comment(db.Model):
     disabled = db.Column(db.Boolean)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-    parrent_id = db.Column(db.Integer)
+    parrent_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
+    parrent = db.relationship('Comment', remote_side=[id], backref=db.backref('child', lazy='dynamic'))
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -383,6 +384,30 @@ class Comment(db.Model):
         # or img tags alltogether
         target.body_html = bleach.linkify(bleach.clean(value,
             tags = allowed_tags, attributes=attrs, protocols=['http', 'https'], strip=True))
+
+    @staticmethod
+    def count_children(parrent = None, count= 0):
+        """Pokusaj da svaki od parenta pozoves iz druge funkcije, na taj  nacin bi
+        trebalo da se dobije dobina za svaki parrent komentar pojedinacno"""
+        #print "start"
+        if parrent:
+            print "parrent id", parrent.id
+        if parrent == None:
+            parrents = Comment.query.filter_by(parrent_id=None).all()
+            for ancestors in parrents:
+                count += Comment.count_children(parrent = ancestors, count =1)
+                print "main count is ", count
+        elif parrent.child.all():    
+            descendants =  parrent.child.all()
+            for descendant in descendants:
+                count +=1
+                count = Comment.count_children(descendant, count=count)
+                print 'second count id ', count 
+        else:
+            print count
+            return count       
+        return count     
+
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 

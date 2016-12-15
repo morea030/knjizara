@@ -47,12 +47,14 @@ ul.comments {
     list-style-type: none;
     padding: 0px;
     margin:160px 0 0 0 ;
+    ;
 }
 
 ul.comments li.comments{
     margin-left:32px;
     padding: 8px;
     border-bottom: 1px solid #e0e0e0;
+
 }
 
 ul.comments li.comment:nth-child(1) {
@@ -74,11 +76,15 @@ div.comment-author {
 
 div.comment-thumbnail {
     position:absolute;
+
 }
 
 div.comment-content {
     margin-left: 108px;
     min-height: 108px;
+    background-color: #CC8F4D;
+    border-radius: 12px;
+    padding: 10px;
 }
 
 div.comment-form {
@@ -87,4 +93,11 @@ div.comment-form {
 div.pagination {
     width: 100%
     text-align:right;
+}
+
+li.comment {
+    background-color: #E3EAD4;
+    margin: 10px;
+    border-radius: 10px;
+    padding: 10px;
 }
