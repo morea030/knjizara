@@ -159,7 +159,7 @@ def post(id):
         page, per_page=current_app.config['COMMENTS_PER_PAGE'], error_out = False)
     comments = pagination.items                
     return render_template('post.html', posts=[post], form = form,
-        comments=comments, pagination=pagination)
+        comments=comments, pagination=pagination, Comment=Comment)
 
 @main.route('/comment/<int:id>', methods=['POST','GET'])
 def comment(id):
@@ -172,7 +172,7 @@ def comment(id):
         flash('Your comment has been added')
         return redirect(url_for('.post', id=post.id))
 
-    return render_template('comments.html', form=form, parrent = parrent_comment)
+    return render_template('comments.html', form=form, parrent = parrent_comment, Comment=Comment)
 
 
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])

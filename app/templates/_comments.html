@@ -1,8 +1,5 @@
 <ul class="comments">
-	{% for comment in comments recursive %}
-
-
-	
+	{% for comment in comments recursive %}	
 	<li class="comment">
 		<div class="comment-thumbnail">
 			<a href="{{url_for('.user', username=comment.author.username)}}">
@@ -15,10 +12,10 @@
 				{% if comment.disabled %}
 					<p><i> This comment has been disabled by moderator.</i></p>
 				{% endif %}
-				{% if moderate or not comment.disabled %}								{{comment.child.count()}}									
+				{% if moderate or not comment.disabled %}																	
 					{% if comment.body_html %}
 					{% if comment.parrent_id %}
-					
+
 						@{{comment.parrent.author.username }}
 						{% endif %}
 						{{comment.body_html | safe }}
@@ -31,19 +28,14 @@
             		<span class = "label label-default">reply</span>
             	</a>
             </div>	
-            
         </div>
 			{% endif %}
 			{% if comment.child %}
+			{{Comment.get_children(comment.id)}}
 
-				
-
-						
 						<ul class="nested">{{loop (comment.child)}}	</ul>
 
-						
 						{% endif %}						
-			
 				
 			{% if moderate %}
 				<br>

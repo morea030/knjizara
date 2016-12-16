@@ -383,30 +383,21 @@ class Comment(db.Model):
         attrs = {'a': ['href'], 'span': ['style']}  # should dissallow external img src,
         # or img tags alltogether
         target.body_html = bleach.linkify(bleach.clean(value,
-            tags = allowed_tags, attributes=attrs, protocols=['http', 'https'], strip=True))
+            tags = allowed_tags, attributes=attrs, protocols=['http', 'https'], strip=True))    
 
-    @staticmethod
-    def count_children(parrent = None, count= 0):
-        """Pokusaj da svaki od parenta pozoves iz druge funkcije, na taj  nacin bi
-        trebalo da se dobije dobina za svaki parrent komentar pojedinacno"""
-        #print "start"
-        if parrent:
-            print "parrent id", parrent.id
-        if parrent == None:
-            parrents = Comment.query.filter_by(parrent_id=None).all()
-            for ancestors in parrents:
-                count += Comment.count_children(parrent = ancestors, count =1)
-                print "main count is ", count
-        elif parrent.child.all():    
+    @staticmethod    
+    def get_children(id, count = 0):
+        """Counts all descendants for given node, ie all subcomments of a given comment"""
+        parrent = Comment.query.filter_by(id=id).first()
+        if parrent.child.all():    
             descendants =  parrent.child.all()
             for descendant in descendants:
                 count +=1
-                count = Comment.count_children(descendant, count=count)
-                print 'second count id ', count 
+                count = Comment.get_children(descendant.id, count=count) 
         else:
-            print count
             return count       
-        return count     
+        return count      
+        
 
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
