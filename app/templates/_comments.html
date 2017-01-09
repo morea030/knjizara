@@ -1,13 +1,14 @@
 <ul class="comments">
-	{% for comment in comments recursive %}	
+	{% for comment in comments recursive %}
+
 	<li class="comment">
 		<div class="comment-thumbnail">
 			<a href="{{url_for('.user', username=comment.author.username)}}">
-				<img class="img-rounded profile-thumbnail" src="{{comment.author.gravatar()}}"></a>
+				<img class="img-rounded profile-thumbnail"  style="width: 40px; height: 40px" src="{{comment.author.gravatar()}}"></a>
 		</div>
 		<div class="comment-content">
 			<div class="comment-date">{{moment(comment.timestamp).fromNow()}}</div>
-			<div class="comment-author"><a href="{{url_for('.user', 		username=comment.author.username)}}">{{comment.author.username}}</a></div>
+			<div class="comment-author"><a href="{{url_for('.user', username=comment.author.username)}}">{{comment.author.username}}</a></div>
 			<div class="comment-body">
 				{% if comment.disabled %}
 					<p><i> This comment has been disabled by moderator.</i></p>

@@ -14,14 +14,18 @@ import hashlib
 import bleach
 import urllib2
 # from slugify import slugify
+import flask_whooshalchemy as whooshalchemy
+
 
 class Knjige(db.Model):
     __tablename__ = "knjige"
+    __searchable__ = ['naziv']
     id = db.Column(db.Integer, primary_key=True)
     naziv = db.Column(db.VARCHAR(256), )
     autor = db.Column(db.VARCHAR(256))
     zanr = db.Column(db.VARCHAR(256))
     cene = db.relationship('Source', backref='naziv', lazy='dynamic')
+    post = db.relationship('Post', backref='knjiga', lazy='dynamic')
 
 class Source(db.Model):
     __tablename__ = "source"
@@ -145,6 +149,7 @@ class User(UserMixin,db.Model):
         return True
 
     def can(self, permissions):
+        print "can"
         return self.role is not None and \
                (self.role.permissions & permissions) == permissions
 
@@ -241,12 +246,14 @@ login_manager.anonymous_user = AnnonymousUser
 
 class Post(db.Model):
     __tablename__='post'
+
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index = True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     body_html= db.Column(db.Text)
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
+    book_id = db.Column(db.Integer, db.ForeignKey('knjige.id'))
     #slug = db.Column(db.String(64))
 
     # def __init__(self, *args, **kwargs):
@@ -291,6 +298,8 @@ class Post(db.Model):
         return '<Post %r' % (self.body)
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+#whooshalchemy.whoosh_index(app, Post)
+
 
 class HeadRequest(urllib2.Request):
     def get_method(self):

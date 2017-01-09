@@ -1,47 +1,51 @@
 # not covered in book https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n
 from . import main
 from ..mail import send_mail
-from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response
+from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g
 from datetime import datetime
-from ..models import User, Role, Permission, Post, Comment
+from ..models import User, Role, Permission, Post, Comment, Knjige, Source
 from flask_login import login_required, current_user
-from forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm
+from forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, SearchForm
 from ..  import db
 from ..decorators import admin_required, permission_required
 from .. import photos
 from werkzeug.utils import secure_filename
 import  os
+#from config import MAX_SEARCH_RESULTS
+MAX_SEARCH_RESULTS = 50
+
 
 
 @main.route('/', methods=['GET', 'POST'])
 @main.route('/index', methods=['GET', 'POST'])
 def index():
-    form = PostForm()
-
-    if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
-        print "HIT"
-        post = Post(body = form.body.data, author=current_user._get_current_object(), timestamp=datetime.utcnow())
-        db.session.add(post)
-        db.session.commit()
-        return redirect(url_for('.index'))
+    #post_form = PostForm()
+    search_form = SearchForm()
+    #
+    # if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
+    #     print "HIT"
+    #     post = Post(body = post_form.body.data, author=current_user._get_current_object(), timestamp=datetime.utcnow())
+    #     db.session.add(post)
+    #     db.session.commit()
+    #     return redirect(url_for('.index'))
     #posts = Post.query.order_by(Post.timestamp.desc()).all()
 #pagination = Post.query.order_by(Post.timestamp.desc()).paginate(page, per_page=current_app.config['POSTS_PER_PAGE'],
                                                                      # error_out=False)
     #posts = pagination.items
 
-    show_followed = False
-    page = request.args.get('page', 1, type=int)
-    if current_user.is_authenticated:
-        show_followed = bool(request.cookies.get('show_followed', ''))
-    if show_followed:
-        query=current_user.followed_posts
-    else:
-        query = Post.query
-    pagination =  query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)          
-    posts = pagination.items
+    # show_followed = False
+    # page = request.args.get('page', 1, type=int)
+    # if current_user.is_authenticated:
+    #     show_followed = bool(request.cookies.get('show_followed', ''))
+    # if show_followed:
+    #     query=current_user.followed_posts
+    # else:
+    #     query = Post.query
+    # pagination =  query.order_by(Post.timestamp.desc()).paginate(
+    #     page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+    # posts = pagination.items
 
-    return render_template("index.html",form=form, posts=posts, current_time=datetime.utcnow(), show_followed=show_followed, pagination=pagination)
+    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow())
 
 
 
@@ -158,10 +162,11 @@ def post(id):
     pagination = post.comments.filter_by(parrent_id=None).order_by(Comment.timestamp.asc()).paginate(
         page, per_page=current_app.config['COMMENTS_PER_PAGE'], error_out = False)
     comments = pagination.items                
-    return render_template('post.html', posts=[post], form = form,
+    return render_template('post.html', posts=[post], post_form = form,
         comments=comments, pagination=pagination, Comment=Comment)
 
 @main.route('/comment/<int:id>', methods=['POST','GET'])
+@login_required
 def comment(id):
     parrent_comment = Comment.query.filter_by(id = id).first()
     post = Post.query.filter_by(id=parrent_comment.post_id).first()
@@ -179,7 +184,7 @@ def comment(id):
 @login_required
 def edit(id):
     post = Post.query.get_or_404(id)
-    if current_user !=post.author and current_user != current_user.can(Permission.ADMINISTER):
+    if current_user != post.author and not current_user.can(Permission.ADMINISTER):
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
@@ -251,7 +256,100 @@ def followed_by(username):
                            endpoint = '.followed_by', pagination=pagination,
                            follows=follows)
 
-# @app.errorhandler(404)
+@main.route('/moderate')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate():
+    show_disabled = bool(request.cookies.get('show_disabled', ''))
+    if show_disabled:
+        query = Comment.query.filter_by(disabled=True)
+
+    else:
+        query = Comment.query    
+    page = request.args.get('page', 1, type=int)
+    pagination = query.order_by(Comment.timestamp.desc()).paginate(page, per_page=current_app.config['COMMENTS_PER_PAGE'],
+        error_out=False)
+    comments = pagination.items
+    return render_template('moderate.html', comments=comments, pagination=pagination, page=page, Comment=Comment, show_disabled=show_disabled)
+
+
+@main.route('/moderate/enable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_enable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = False
+    db.session.add(comment) 
+    return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))
+
+
+@main.route('/moderate/disable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_disable(id):
+    print 'moderate disable'
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = True
+    db.session.add(comment)
+    return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))
+
+
+@main.route('/moderate/show_disabled')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_disabled():
+    """Shows only disabled comments to mod panel"""
+    resp = make_response(redirect(url_for('.moderate')))
+    resp.set_cookie('show_disabled', '1', max_age= 30*24*60*60)
+    return resp
+
+@main.route('/moderate/show_all')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_all():
+    """Shows all comments to mod panel"""
+    resp = make_response(redirect(url_for('.moderate')))
+    resp.set_cookie('show_disabled', '', max_age = 30*24*60*60)
+    return resp
+
+@main.route('/search', methods=['POST'])
+def search():
+    search_form = SearchForm()
+    if not search_form.validate_on_submit():
+        return redirect(url_for('.index'))
+    return redirect(url_for('.search_result',query = search_form.search.data))    
+
+@main.route('/search_results/<query>')    
+def search_result(query):
+    search = True
+    results= Knjige.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
+    print results
+    return render_template('search_results.html', query=query, results=results, search=search)
+
+@main.route('/book_page/<book_id>', methods = ['POST', 'GET'])
+def book_page(book_id):
+    post_form = PostForm()
+    book = Knjige.query.filter_by(id=book_id).first()
+    if book:
+        book_title= book.naziv
+        book_autor = book.autor
+        posts = Post.query.filter_by(book_id = book_id).all()
+        source = Source.query.filter_by(knjiga = book_id).all()
+        autor_books = Knjige.query.filter_by(autor = book_autor).all()
+        if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
+            post = Post(body = post_form.body.data, book_id = book_id, author = current_user._get_current_object(),
+                        timestamp = datetime.utcnow())
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('.book_page', book_id=book_id))
+        return render_template('book_page.html', book_title = book_title, book_autor= book_autor, source=source,
+                               autor_books=autor_books, posts=posts, post_form=post_form)
+    else:
+        abort(404)
+
+
+        
+# @app.errorhandler(40Permissio4)
 # def page_not_found(e):
 #     print "not found"
 #     return render_template('404.html'), 404
@@ -259,4 +357,4 @@ def followed_by(username):
 
 # @app.errorhandler(500)
 # def internal_server_error(e):
-#     return render_template('500.html'), 500
+#     return render_template('500.html'), .add500

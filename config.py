@@ -17,6 +17,7 @@ class Config:
     PHOTO_ABSOLUTE = os.path.join(basedir,  )
     #SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_RECORD_QUERIES = True
+    MAX_SEARCH_RESULTS = 50
     OAUTH_CREDENTIALS ={
         'facebook':{
             'id': '1779440718972979',
@@ -46,7 +47,8 @@ class DevelopmentConfig(Config):
     MAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
     SQLALCHEMY_DATABASE_URI = 'mysql://root:Igojelira1208@localhost/knjizara'
     SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
-
+    WHOOSH_BASE = os.path.join(basedir, 'whoosh_index')
+    
 class TestConfig(Config):
     Testing = True
     SQLALCHEMY_DATABASE_URI = 'mysql://root:Igojelira1208@localhost/test_knjizara'

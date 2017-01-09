@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<h1><small>Search results for - </small>{{query}}:</h1>
+        <div class="search_results" style="margin-left: 5px; padding: 5px; ">
+            <ul class="list-unstyled">
+                {% for result in results %}
+                    <li>
+                        <a href="{{ url_for('.book_page', book_id = result.id) }}">
+                            <p>
+                                <button type="button" class="btn btn-primary btn-lg">{{ result.naziv }}: {{ result.autor }}</button>
+                            </p>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+
+{% endblock %}

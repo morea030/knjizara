@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_pagedown import PageDown
+import flask_whooshalchemy as whooshalchemy
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -35,6 +36,10 @@ def create_app(config_name):
     login_manager.init_app(app)
     configure_uploads(app, photos)
     pagedown.init_app(app)
+
+    from models import Knjige
+    whooshalchemy.whoosh_index(app, Knjige)
+
 
     from main import main as main_blueprint
     app.register_blueprint(main_blueprint)

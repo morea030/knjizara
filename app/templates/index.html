@@ -1,21 +1,7 @@
 {% extends "base.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
-{% import "_macros.html" as macros %}
+
 {% block page_content %}
-<!-- {#
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-markdown/2.10.0/js/bootstrap-markdown.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown.js/0.5.0/markdown.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/to-markdown/3.0.3/to-markdown.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-markdown/2.10.0/css/bootstrap-markdown.min.css" rel="stylesheet" />
-
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-#} -->
- <script src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.0.1/ckeditor.js"></script>
 
 {% if current_user.is_authenticated %}
    Zdravo, {{ current_user.username }}
@@ -23,55 +9,14 @@
     Dobrodošli
 {%  endif %}
 
-<div>{% if current_user.can(Permission.WRITE_ARTICLES)%}
-    <form class="form form-horizontal" method="post" role="form" data-provide="markdown">
-  {{ form.hidden_tag() }}
-  {{ wtf.form_errors(form, hiddens="only") }}
+<form  action="{{ url_for('.search') }}" method="post" name="search">{{ search_form.hidden_tag() }}{{ search_form.search(size=20) }}<input type="submit" value="Search"></form>
 
-
-<label class="control-label" for="body">Whats on your mind</label>
-
-{#          <div class="flask-pagedown"><textarea class="form-control flask-pagedown-input" id="flask-pagedown-body" data-provide="markdown" name="body" required></textarea></div>#}
-
-  <textarea class="form-control"  id="editor1" name="body" required>&lt;p&gt;Initial value.&lt;/p&gt;</textarea>
-			<script type="text/javascript">
-				CKEDITOR.replace( 'body' );
-			</script>
-
-
-  {{ wtf.form_field(form.submit) }}
-</form>
-{% endif %}
-</div>
-
-<div class="post-tabs">
-  <ul class="nav nav-tabs">
-    <li {% if not show_followed %} class="active" {% endif %}>
-      <a href="{{url_for('.show_all')}}">Show All</a>
-    </li>  
-    {% if current_user.is_authenticated %}
-    <li {% if show_followed %} class ="active" {% endif %}>
-      <a href="{{url_for('.show_followed')}}">Followed</a>
-    </li>
-    {% endif %}
-  </ul>    
-</div>
-
-{% include '_posts.html' %}
-<div class="pagination">
-    {{ macros.pagination_widget(pagination,'.index') }}
-</div>
 <p> Vaše lokalno vreme je {{ moment(current_time).format(LLL) }}</p>
 <p>{{ moment(current_time).fromNow(refresh =True)}} </p>
 
 {% endblock %}
 
-
-{% block scripts %}
-{{  super() }}
-{{ pagedown.include_pagedown() }}
+{#old_index je u .auth#}
 
 
-
-{% endblock %}
 
