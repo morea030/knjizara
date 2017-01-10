@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block page_content %}
+
+<div class="post-tabs">
+  <ul class="nav nav-tabs">
+    <li {% if not show_followed %} class="active" {% endif %}>
+      <a href="{{url_for('.show_all')}}">Show All</a>
+    </li>
+    {% if current_user.is_authenticated %}
+    <li {% if show_followed %} class ="active" {% endif %}>
+      <a href="{{url_for('.show_followed')}}">Followed</a>
+    </li>
+    {% endif %}
+  </ul>
+</div>
+
+{% include '_posts.html' %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination,'.dashboard', username=username) }}
+</div>
+
+{% endblock %}
+
