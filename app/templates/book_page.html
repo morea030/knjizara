@@ -5,6 +5,16 @@
  <script src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.0.1/ckeditor.js"></script>
 
 <h1>{{ book_title }} <small>{{ book_autor }}</small></h1>
+{% if current_user.can(Permission.FOLLOW) %}
+    {% if not current_user.is_following(item, 'item') %}
+        <a href="{{ url_for('.follow', type='naziv', name=book_title) }}" class="btn btn-primary">
+            Follow {{ book_title }}</a>
+    {% else %}
+        <a href="{{ url_for('.unfollow', type='item', name=item.username) }}" class="btn btn-default">
+            Unfollow</a>
+
+    {% endif %}
+{% endif %}
 
 {% for instance in source %}
 <p>{{ instance.cena }} {{ instance.website }} {{ instance.knjizara }}</p>

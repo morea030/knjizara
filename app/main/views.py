@@ -195,36 +195,58 @@ def edit(id):
     form.body.data = post.body
     return render_template('edit_post.html', form = form, post=post)
 
-@main.route('/follow/<username>')
+@main.route('/follow/<type>/<name>')
 @login_required
 @permission_required(Permission.FOLLOW)
-def follow(username):
-    user = User.query.filter_by(username=username).first()
-    if user is None:
-        flash('Invalid user')
-        return redirect(url_for('.index'))
-    if current_user.is_following(user):
-        flash('You are already following this user')
-        return redirect(url_for('.user', username=username))
-    current_user.follow(user)
-    flash('You are now following %s' % username)
-    return redirect(url_for('.user', username=username))
+def follow(type, name):
+    print type, name
+    if type == 'User':
+        user = User.query.filter_by(username=name).first()
+        if user is None:
+            flash('Invalid user')
+            return redirect(url_for('.index'))
+        if current_user.is_following(user, type):
+            flash('You are already following this user')
+            return redirect(url_for('.user', username=name))
+        current_user.follow(user, type)
+        flash('You are now following %s' % name)
+    elif type == 'naziv' or type =='autor' or type == 'genre':
+        print "ELSE"
 
-@main.route('/user/unfollow')
+        kwargs = {type : name}
+        item = Knjige.query.filter_by(**kwargs).first()
+        print "ITEM is ", item
+        if item is None:
+            flash('invalid %s'), type
+            return redirect(request.referrer)
+        if  current_user.is_following(item, 'item'):
+            print "True"
+            flash('You are already following this user')
+            return redirect(request.referrer)
+        current_user.follow(item, 'item')
+        flash('You are now following %s' % name)
+    print "REQUEST REFFERER IS ", request.referrer
+    return redirect(request.referrer)
+
+@main.route('/unfollow/<type>/<name>')
 @login_required
 @permission_required(Permission.FOLLOW)
-def unfollow(username):
-    user = User.query.filter_by(username=username).first()
-    if user is None:
-        flash('Invalid user')
-        return redirect(url_for('.index'))
-    if not current_user.is_following(user):
-        flash('You dont follow this user')
-        return redirect(url_for('.index'))
-    if user == current_user:
-        return redirect(url_for('.index'))
-    current_user.unfollow(user)
-    flash('You have unfollowed %s' % user)
+def unfollow(type, name):
+    if type == 'book':
+        user = User.query.filter_by(username=name).first()
+        if user is None:
+            flash('Invalid user')
+            return redirect(url_for('.index'))
+        if not current_user.is_following(user, type):
+            flash('You dont follow this user')
+            return redirect(url_for('.index'))
+        if user == current_user:
+            return redirect(url_for('.index'))
+        current_user.unfollow(user, type)
+        flash('You have unfollowed %s' % user)
+
+    elif type =='naziv' or type == 'Autor' or type =='Genre':
+        print "Unfollow"
     return redirect(url_for('.user', username = user.username))
 
 @main.route('/followers/<username>')
@@ -343,26 +365,29 @@ def book_page(book_id):
             db.session.commit()
             return redirect(url_for('.book_page', book_id=book_id))
         return render_template('book_page.html', book_title = book_title, book_autor= book_autor, source=source,
-                               autor_books=autor_books, posts=posts, post_form=post_form)
+                               autor_books=autor_books, posts=posts, post_form=post_form, item = book)
     else:
         abort(404)
 
 @main.route('/dashboard/<username>')
 @login_required
 def dashboard(username):
+    items = None
     show_followed = False
-    page = request.args.get('page', 1, type=int)
-    if current_user.is_authenticated:
-        show_followed = bool(request.cookies.get('show_followed', ''))
+    # page = request.args.get('page', 1, type=int)
+    # if current_user.is_authenticated:
+    show_followed = bool(request.cookies.get('show_followed', ''))
     if show_followed:
         query = current_user.followed_posts
-    else:
-        query = Post.query
-    pagination = query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
-    posts = pagination.items
+        items = current_user.followed_items #.order_by(Post.timestamp.desc())
+        posts = query.union(items).order_by(Post.timestamp.desc())
 
-    return render_template('dashboard.html', posts = posts, pagination = pagination, show_followed=show_followed, username=username)
+    else:
+        posts = Post.query.order_by(Post.timestamp.desc())
+    # pagination = query.order_by(Post.timestamp.desc()).paginate(
+        # page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+
+    return render_template('dashboard.html', posts=posts,  show_followed=show_followed, username=username)
 
 
 

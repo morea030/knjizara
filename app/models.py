@@ -17,6 +17,13 @@ import urllib2
 import flask_whooshalchemy as whooshalchemy
 
 
+class FollowItems(db.Model):
+    __tablename__ = 'follow_item'
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('knjige.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class Knjige(db.Model):
     __tablename__ = "knjige"
     __searchable__ = ['naziv']
@@ -26,6 +33,10 @@ class Knjige(db.Model):
     zanr = db.Column(db.VARCHAR(256))
     cene = db.relationship('Source', backref='naziv', lazy='dynamic')
     post = db.relationship('Post', backref='knjiga', lazy='dynamic')
+    followed = db.relationship('FollowItems', foreign_keys=[FollowItems.followed_id],
+                               backref=db.backref('follower', lazy='joined'),
+                               lazy='dynamic', cascade='all, delete-orphan')
+
 
 class Source(db.Model):
     __tablename__ = "source"
@@ -35,6 +46,9 @@ class Source(db.Model):
     opis = db.Column(db.Text)
     knjiga = db.Column(db.Integer, db.ForeignKey('knjige.id'))
     slika = db.Column(db.VARCHAR(128))
+
+
+
 
 
 class Follow(db.Model):
@@ -65,6 +79,8 @@ class User(UserMixin,db.Model):
     followed = db.relationship('Follow', foreign_keys=[Follow.follower_id], backref=db.backref('follower', lazy='joined'),
                                   lazy='dynamic', cascade = 'all, delete-orphan')
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id], backref=db.backref('followed', lazy= 'joined'),
+                                lazy = 'dynamic', cascade='all, delete-orphan')
+    following_item = db.relationship('FollowItems', foreign_keys=[FollowItems.follower_id], backref=db.backref('follower_item', lazy= 'joined'),
                                 lazy = 'dynamic', cascade='all, delete-orphan')
 
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
@@ -174,18 +190,37 @@ class User(UserMixin,db.Model):
             return self.social_image
         return url_for('static', filename='uploads/{image}'.format(image=self.image))
 
-    def follow(self, user):
-        if not self.is_following(user):
-            f = Follow(follower=self, followed = user)
+    def follow(self, user, type):
+        print 'Follow'
+        f = None
+        if type == 'user':
+            if not self.is_following(user, type):
+                f = Follow(follower=self, followed = user)
+        elif type == 'item':
+            print 'Follow item'
+            if not self.is_following(user, type):
+                print 'is not following'
+                f = FollowItems(follower_item= self, followed_id = user.id)
+        if f:
             db.session.add(f)
 
-    def unfollow(self, user):
-        f = self.followed.filter_by(followed_id =user.id).first()
+    def unfollow(self, user, type):
+        f = None
+        if type == 'user':
+            f = self.followed.filter_by(followed_id =user.id).first()
+        elif type == 'item':
+            f = self.followed_item.filter_by(followed_id = user.id).first()
         if f:
             db.session.delete(f)
 
-    def is_following(self,user):
-        return self.followed.filter_by(followed_id=user.id).first() is not None
+    def is_following(self,user, type):
+        if type == 'user':
+            return self.followed.filter_by(followed_id=user.id).first() is not None
+        elif type == 'item':
+            print "ITEM"
+            return self.following_item.filter_by(followed_id=user.id).first() is not None
+        else:
+            return False
 
     def is_followed(self, user):
         return self.followers.filter(follower_id=user.id).first() is not None
@@ -193,7 +228,12 @@ class User(UserMixin,db.Model):
     @property
     def followed_posts(self):
         return Post.query.join(Follow, Follow.followed_id == Post.user_id)\
-                .filter(Follow.follower_id==self.id)
+                .filter(Follow.follower_id == self.id)
+
+    @property
+    def followed_items(self):
+        return Post.query.join(FollowItems, FollowItems.followed_id == Post.book_id)\
+                .filter(FollowItems.follower_id == self.id)
 
     @staticmethod
     def generate_fake(count=100):

@@ -20,6 +20,9 @@
         {% else %}
             {{ post.body }}
         {% endif %}
+    {% if post.book_id %}
+    <a href="{{ url_for('.book_page', book_id=post.book_id) }}">#{{ post.knjiga.naziv }}</a>
+    {% endif %}
     </div >
     <div class="post-footer">
         <a href="{{ url_for('.post', id=post.id) }}">
