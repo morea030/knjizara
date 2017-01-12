@@ -209,7 +209,7 @@ class User(UserMixin,db.Model):
         if type == 'user':
             f = self.followed.filter_by(followed_id =user.id).first()
         elif type == 'item':
-            f = self.followed_item.filter_by(followed_id = user.id).first()
+            f = self.following_item.filter_by(followed_id = user.id).first()
         if f:
             db.session.delete(f)
 

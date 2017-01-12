@@ -10,7 +10,7 @@
         <a href="{{ url_for('.follow', type='naziv', name=book_title) }}" class="btn btn-primary">
             Follow {{ book_title }}</a>
     {% else %}
-        <a href="{{ url_for('.unfollow', type='item', name=item.username) }}" class="btn btn-default">
+        <a href="{{ url_for('.unfollow', type='naziv', name=item.naziv) }}" class="btn btn-default">
             Unfollow</a>
 
     {% endif %}

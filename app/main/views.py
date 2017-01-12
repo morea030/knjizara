@@ -210,21 +210,35 @@ def follow(type, name):
             return redirect(url_for('.user', username=name))
         current_user.follow(user, type)
         flash('You are now following %s' % name)
-    elif type == 'naziv' or type =='autor' or type == 'genre':
+    elif type == 'naziv' :
         print "ELSE"
 
         kwargs = {type : name}
         item = Knjige.query.filter_by(**kwargs).first()
         print "ITEM is ", item
         if item is None:
-            flash('invalid %s'), type
+            flash('invalid %s' % type)
             return redirect(request.referrer)
         if  current_user.is_following(item, 'item'):
             print "True"
-            flash('You are already following this user')
+            flash('You are already following this %s' % item)
             return redirect(request.referrer)
         current_user.follow(item, 'item')
         flash('You are now following %s' % name)
+    elif  type =='autor' or type == 'genre':
+        kwargs = {type: name}
+        items = Knjige.query.filter_by(**kwargs).all()
+        print "ITEM is ", items
+        if items is None:
+            flash('invalid %s' % type)
+            return redirect(request.referrer)
+        for item in items:
+            if current_user.is_following(item, 'item'):
+                print "True"
+                flash('You are already following this %s' % item)
+                return redirect(request.referrer)
+            current_user.follow(item, 'item')
+
     print "REQUEST REFFERER IS ", request.referrer
     return redirect(request.referrer)
 
@@ -232,7 +246,7 @@ def follow(type, name):
 @login_required
 @permission_required(Permission.FOLLOW)
 def unfollow(type, name):
-    if type == 'book':
+    if type == 'User':
         user = User.query.filter_by(username=name).first()
         if user is None:
             flash('Invalid user')
@@ -245,9 +259,18 @@ def unfollow(type, name):
         current_user.unfollow(user, type)
         flash('You have unfollowed %s' % user)
 
-    elif type =='naziv' or type == 'Autor' or type =='Genre':
-        print "Unfollow"
-    return redirect(url_for('.user', username = user.username))
+    elif type =='naziv' or type == 'autor' or type =='genre':
+        kwargs = {type: name}
+        item = Knjige.query.filter_by(**kwargs).first()
+        if item is None:
+            flash ('Invalid %s' %type)
+            return redirect(request.referrer)
+        if not current_user.is_following(item, 'item'):
+            flash ('You dont follow this %s' %type)
+            return redirect(request.referrer)
+        current_user.unfollow(item, 'item')
+        flash('You have unfooded %s' %type)
+    return redirect(request.referrer)
 
 @main.route('/followers/<username>')
 def followers(username):
