@@ -3,7 +3,7 @@ from . import main
 from ..mail import send_mail
 from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g
 from datetime import datetime
-from ..models import User, Role, Permission, Post, Comment, Knjige, Source
+from ..models import User, Role, Permission, Post, Comment, Knjige, Source, Authors
 from flask_login import login_required, current_user
 from forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, SearchForm
 from ..  import db
@@ -199,7 +199,7 @@ def edit(id):
 @login_required
 @permission_required(Permission.FOLLOW)
 def follow(type, name):
-    print type, name
+    #print type, name
     if type == 'User':
         user = User.query.filter_by(username=name).first()
         if user is None:
@@ -215,7 +215,7 @@ def follow(type, name):
 
         kwargs = {type : name}
         item = Knjige.query.filter_by(**kwargs).first()
-        print "ITEM is ", item
+        #print "ITEM is ", item
         if item is None:
             flash('invalid %s' % type)
             return redirect(request.referrer)
@@ -225,19 +225,15 @@ def follow(type, name):
             return redirect(request.referrer)
         current_user.follow(item, 'item')
         flash('You are now following %s' % name)
-    elif  type =='autor' or type == 'genre':
-        kwargs = {type: name}
-        items = Knjige.query.filter_by(**kwargs).all()
-        print "ITEM is ", items
-        if items is None:
+    elif  type =='author':
+        author = Authors.query.filter_by(name=name).first()
+        if author is None:
             flash('invalid %s' % type)
             return redirect(request.referrer)
-        for item in items:
-            if current_user.is_following(item, 'item'):
-                print "True"
-                flash('You are already following this %s' % item)
-                return redirect(request.referrer)
-            current_user.follow(item, 'item')
+        if current_user.is_following(author, 'author'):
+            flash('You are already following this %s' % author)
+            return redirect(request.referrer)
+        current_user.follow(author, 'author')
 
     print "REQUEST REFFERER IS ", request.referrer
     return redirect(request.referrer)
@@ -246,30 +242,28 @@ def follow(type, name):
 @login_required
 @permission_required(Permission.FOLLOW)
 def unfollow(type, name):
+    item = None
     if type == 'User':
-        user = User.query.filter_by(username=name).first()
-        if user is None:
-            flash('Invalid user')
-            return redirect(url_for('.index'))
-        if not current_user.is_following(user, type):
-            flash('You dont follow this user')
-            return redirect(url_for('.index'))
-        if user == current_user:
-            return redirect(url_for('.index'))
-        current_user.unfollow(user, type)
-        flash('You have unfollowed %s' % user)
+        item = User.query.filter_by(username=name).first()
 
-    elif type =='naziv' or type == 'autor' or type =='genre':
+        if item == current_user:
+            return redirect(url_for('.index'))
+        # current_user.unfollow(user, type)
+        # flash('You have unfollowed %s' % user)
+        return redirect(request.referrer)
+    elif type == 'naziv':
         kwargs = {type: name}
         item = Knjige.query.filter_by(**kwargs).first()
-        if item is None:
-            flash ('Invalid %s' %type)
-            return redirect(request.referrer)
-        if not current_user.is_following(item, 'item'):
-            flash ('You dont follow this %s' %type)
-            return redirect(request.referrer)
-        current_user.unfollow(item, 'item')
-        flash('You have unfooded %s' %type)
+
+    elif type == 'author':
+        item = Authors.query.filter_by(name=name).first()
+    if item is None:
+        flash ('Invalid %s' % type)
+    if not current_user.is_following(item, type):
+        flash ('You dont follow this %s' % type)
+        return redirect(request.referrer)
+    current_user.unfollow(item, type)
+    flash('You have unfollowed %s' % type)
     return redirect(request.referrer)
 
 @main.route('/followers/<username>')
@@ -375,9 +369,10 @@ def search_result(query):
 def book_page(book_id):
     post_form = PostForm()
     book = Knjige.query.filter_by(id=book_id).first()
+    author = Authors.query.filter_by(id=book.autor).first()
     if book:
         book_title= book.naziv
-        book_autor = book.autor
+        book_autor = author.name #book.autor
         posts = Post.query.filter_by(book_id = book_id).all()
         source = Source.query.filter_by(knjiga = book_id).all()
         autor_books = Knjige.query.filter_by(autor = book_autor).all()
@@ -388,7 +383,7 @@ def book_page(book_id):
             db.session.commit()
             return redirect(url_for('.book_page', book_id=book_id))
         return render_template('book_page.html', book_title = book_title, book_autor= book_autor, source=source,
-                               autor_books=autor_books, posts=posts, post_form=post_form, item = book)
+                               autor_books=autor_books, posts=posts, post_form=post_form, item = book, author=author)
     else:
         abort(404)
 

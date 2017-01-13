@@ -24,12 +24,21 @@ class FollowItems(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class FollowAuthors(db.Model):
+    __tablename__ = 'follow_authors'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+
 class Knjige(db.Model):
     __tablename__ = "knjige"
     __searchable__ = ['naziv']
     id = db.Column(db.Integer, primary_key=True)
     naziv = db.Column(db.VARCHAR(256), )
-    autor = db.Column(db.VARCHAR(256))
+    #autor = db.Column(db.VARCHAR(256))
+    autor = db.Column(db.Integer, db.ForeignKey('authors.id'))
     zanr = db.Column(db.VARCHAR(256))
     cene = db.relationship('Source', backref='naziv', lazy='dynamic')
     post = db.relationship('Post', backref='knjiga', lazy='dynamic')
@@ -37,6 +46,8 @@ class Knjige(db.Model):
                                backref=db.backref('follower', lazy='joined'),
                                lazy='dynamic', cascade='all, delete-orphan')
 
+    isbn = db.Column(db.VARCHAR(64))
+    timestamp = db.Column(db.DateTime)
 
 class Source(db.Model):
     __tablename__ = "source"
@@ -46,7 +57,21 @@ class Source(db.Model):
     opis = db.Column(db.Text)
     knjiga = db.Column(db.Integer, db.ForeignKey('knjige.id'))
     slika = db.Column(db.VARCHAR(128))
+    knjizara = db.Column(db.VARCHAR(64))
+    knjizara_sajt = db.Column(db.VARCHAR(128))
 
+
+
+
+
+class Authors(db.Model):
+    __tablename__='authors'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.VARCHAR(256))
+    books = db.relationship('Knjige', backref='author', lazy='dynamic')
+    followers = db.relationship('FollowAuthors', foreign_keys=[FollowAuthors.author_id],
+                               backref=db.backref('authors', lazy='joined'),
+                               lazy='dynamic', cascade='all, delete-orphan')
 
 
 
@@ -82,12 +107,15 @@ class User(UserMixin,db.Model):
                                 lazy = 'dynamic', cascade='all, delete-orphan')
     following_item = db.relationship('FollowItems', foreign_keys=[FollowItems.follower_id], backref=db.backref('follower_item', lazy= 'joined'),
                                 lazy = 'dynamic', cascade='all, delete-orphan')
+    followed_author = db.relationship('FollowAuthors', foreign_keys=[FollowAuthors.user_id],
+                               backref=db.backref('follower', lazy='joined'),
+                               lazy='dynamic', cascade='all, delete-orphan')
 
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        self.follow(self)
+        self.follow(self, 'user')
         if self.role is None:
             if self.email == current_app.config['KNJIZARA_ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
@@ -196,29 +224,36 @@ class User(UserMixin,db.Model):
         if type == 'user':
             if not self.is_following(user, type):
                 f = Follow(follower=self, followed = user)
-        elif type == 'item':
+        elif type == 'item' or type == 'author':
             print 'Follow item'
             if not self.is_following(user, type):
                 print 'is not following'
-                f = FollowItems(follower_item= self, followed_id = user.id)
+                if type == 'item':
+                    f = FollowItems(follower_item=self, followed_id=user.id)
+                elif type == 'author':
+                    f = FollowAuthors(follower=self, author_id=user.id)
         if f:
             db.session.add(f)
 
     def unfollow(self, user, type):
         f = None
-        if type == 'user':
-            f = self.followed.filter_by(followed_id =user.id).first()
-        elif type == 'item':
-            f = self.following_item.filter_by(followed_id = user.id).first()
+        if type == 'User':
+            f = self.followed.filter_by(followed_id=user.id).first()
+        elif type == 'naziv':
+            f = self.following_item.filter_by(followed_id=user.id).first()
+        elif type == 'author':
+            f = self.followed_author.filter_by(author_id=user.id).first()
         if f:
             db.session.delete(f)
 
-    def is_following(self,user, type):
+    def is_following(self, user, type):
         if type == 'user':
             return self.followed.filter_by(followed_id=user.id).first() is not None
         elif type == 'item':
             print "ITEM"
             return self.following_item.filter_by(followed_id=user.id).first() is not None
+        elif type == 'author':
+            return self.followed_author.filter_by(author_id=user.id).first() is not None
         else:
             return False
 
