@@ -375,7 +375,7 @@ def book_page(book_id):
         book_autor = author.name #book.autor
         posts = Post.query.filter_by(book_id = book_id).all()
         source = Source.query.filter_by(knjiga = book_id).all()
-        autor_books = Knjige.query.filter_by(autor = book_autor).all()
+        autor_books = Knjige.query.filter_by(autor = author.id).all()
         if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
             post = Post(body = post_form.body.data, book_id = book_id, author = current_user._get_current_object(),
                         timestamp = datetime.utcnow())
@@ -397,8 +397,10 @@ def dashboard(username):
     show_followed = bool(request.cookies.get('show_followed', ''))
     if show_followed:
         query = current_user.followed_posts
-        items = current_user.followed_items #.order_by(Post.timestamp.desc())
-        posts = query.union(items).order_by(Post.timestamp.desc())
+        items = current_user.followed_items
+        authors = current_user.followed_authors
+        print authors
+        posts = query.union_all(items, authors).order_by(Post.timestamp.desc())
 
     else:
         posts = Post.query.order_by(Post.timestamp.desc())

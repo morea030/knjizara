@@ -8,7 +8,7 @@
                     <li>
                         <a href="{{ url_for('.book_page', book_id = result.id) }}">
                             <p>
-                                <button type="button" class="btn btn-primary btn-lg">{{ result.naziv }}: {{ result.autor }}</button>
+                                <button type="button" class="btn btn-primary btn-lg">{{ result.naziv }}: {{ result.author.name }}</button>
                             </p>
                         </a>
                     </li>

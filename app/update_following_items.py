@@ -5,12 +5,15 @@ from app import db
 def update_followers():
     current_time = datetime.datetime.utcnow()
     two_weeks_ago = current_time - datetime.timedelta(weeks=2)
-    books = Knjige.query.filter(Knjige.timestamp>two_weeks_ago).all
+    print two_weeks_ago
+    books = Knjige.query.all() #.filter(Knjige.timestamp<two_weeks_ago).all()
     users = User.query.all()
     for book in books:
+       # print   book.id
         for user in users:
-            if user.follow(book):
-                pass
+            if user.is_following( book.author, 'author'):
+                print "User {} followw {}" .format(user.name, book.author.name)
+    return
 
 
 

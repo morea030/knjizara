@@ -269,6 +269,15 @@ class User(UserMixin,db.Model):
     def followed_items(self):
         return Post.query.join(FollowItems, FollowItems.followed_id == Post.book_id)\
                 .filter(FollowItems.follower_id == self.id)
+    @property
+    def followed_authors(self):
+        # return db.session.query(Knjige, Post).join( FollowAuthors, FollowAuthors.author_id==Knjige.autor ).join(Post, Post.book_id==Knjige.id)\
+        #     .filter(FollowAuthors.user_id==self.id)#Dovrsiti folow autor do autora autor do knjige knjiga do posta
+
+        # return Post.query.join(FollowAuthors, FollowAuthors.author_id == Post.knjiga.any(autor))\
+        #     .filter_by(FollowAuthors.user_id == self.id)
+        return Post.query.join(Knjige, Knjige.id == Post.book_id).join(FollowAuthors,
+                                                               FollowAuthors.author_id == Knjige.autor).filter(FollowAuthors.user_id == self.id)
 
     @staticmethod
     def generate_fake(count=100):

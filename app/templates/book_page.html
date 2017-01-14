@@ -52,6 +52,6 @@
 </div>
 <p>Druge knjige autora</p>
 {% for book in autor_books %}
-<a href="{{url_for('.book_page', book_id=book_id)}}">{{ book.naziv }}</a>
+<a href="{{url_for('.book_page', book_id=book.id)}}">{{ book.naziv }}</a>
 {% endfor %}
 {% endblock %}
