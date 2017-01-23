@@ -9,10 +9,10 @@ def update_followers():
     books = Knjige.query.all() #.filter(Knjige.timestamp<two_weeks_ago).all()
     users = User.query.all()
     for book in books:
-       # print   book.id
+        print   book.id
         for user in users:
             if user.is_following( book.author, 'author'):
-                print "User {} followw {}" .format(user.name, book.author.name)
+                user.follow()
     return
 
 

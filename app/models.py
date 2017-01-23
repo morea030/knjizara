@@ -47,7 +47,7 @@ class Knjige(db.Model):
                                lazy='dynamic', cascade='all, delete-orphan')
 
     isbn = db.Column(db.VARCHAR(64))
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow())
 
 class Source(db.Model):
     __tablename__ = "source"
@@ -253,6 +253,7 @@ class User(UserMixin,db.Model):
             print "ITEM"
             return self.following_item.filter_by(followed_id=user.id).first() is not None
         elif type == 'author':
+
             return self.followed_author.filter_by(author_id=user.id).first() is not None
         else:
             return False
