@@ -21,6 +21,9 @@ MAX_SEARCH_RESULTS = 50
 def index():
     #post_form = PostForm()
     search_form = SearchForm()
+    books = Knjige.query.order_by(Knjige.timestamp.desc()).limit(6)
+    posts = Post.query.order_by(Post.timestamp.desc()).limit(6)
+
     #
     # if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
     #     print "HIT"
@@ -45,7 +48,7 @@ def index():
     #     page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     # posts = pagination.items
 
-    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow())
+    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow(), books=books, posts=posts)
 
 
 
@@ -360,6 +363,7 @@ def search():
 
 @main.route('/search_results/<query>')    
 def search_result(query):
+    print "SEARCH"
     search = True
     results= Knjige.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
     print results

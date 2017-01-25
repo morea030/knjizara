@@ -15,10 +15,18 @@
         </a>
     </div>
     <div class="post-body">
-        {% if post.body_html %}
-            {{ post.body_html | safe }}
+        {% if request.endpoint=='main.index' %}
+            {% if post.body_html %}
+                {{ post.body_html | safe |truncate(80)}}
+            {% else %}
+                {{ post.body | truncate(80)}}
+            {% endif %}
         {% else %}
-            {{ post.body }}
+            {% if post.body_html %}
+                {{ post.body_html | safe }}
+            {% else %}
+                {{ post.body}}
+            {% endif %}
         {% endif %}
     {% if post.book_id %}
     <a href="{{ url_for('.book_page', book_id=post.book_id) }}">#{{ post.knjiga.naziv }}</a>

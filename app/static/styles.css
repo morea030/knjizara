@@ -1,3 +1,9 @@
+body {
+
+	background-size:cover;
+	min-height: 	100%;
+}
+
 .profile-thumbnail {
     position: absolute;
 
@@ -100,4 +106,264 @@ li.comment {
     margin: 10px;
     border-radius: 10px;
     padding: 10px;
+}
+
+#main-container{
+    background-color: white;
+}
+
+#footer-row {
+
+	margin:1px;
+
+}
+.page-footer{
+
+	background-color: #F8F8F8;
+	border-top-color: rgb(231,231, 231);
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	border-top-style: solid;
+	border-top-width: 1px;
+	box-shadow:inset 0 -1px 0 rgba(255,255,255,.15), 0 -1px 5px rgba(0,0,0,.075);
+	color: #818181;
+	margin-top:40px;
+	padding-bottom: 10px;
+    padding-left:10px;
+
+
+}
+.page-footer h5, .page-footer a:link{
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	color: #818181;
+	font-size: 25px;
+}
+.page-footer h5{
+	text-align: center;
+}
+#main-container{
+	background: white; /* #F3FBFF;*/
+
+	min-height: 100%;
+	box-shadow: 2px 2px 1px Black;
+	padding: 0px;
+	width:80%;
+	 height: 100%;
+	 font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	 color: #818181;
+	}
+/* The side navigation menu for desktops and laptops */
+.sidenav {
+	margin-top: 0%;
+	max-width:25%;
+	float:left;
+	padding-bottom: 80px;
+	border-right:solid 1px rgb(231,231, 231);
+	/*background-color: #F8F8F8;*/
+
+}
+
+/* The navigation menu links */
+.sidenav a {
+    padding: 8px 18px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s
+
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover, .offcanvas a:focus{
+    color: #f1f1f1;
+}
+
+.sidenav h1 {
+	padding: 0px 8px 18px 32px;
+    text-decoration: none;
+    font-size: 30px;
+    color: #818181;
+    display: block;
+    transition: 0.3s
+
+}
+
+/*for mobile */
+/* The side navigation menu */
+.msidenav {
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    left: 0;
+    background-color: #111; /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.msidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s
+}
+
+/* When you mouse over the navigation links, change their color */
+.msidenav a:hover, .offcanvas a:focus{
+    color: #f1f1f1;
+}
+
+/* Position and style the close button (top right corner) */
+.msidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+@import "compass/css3";
+
+/***********************
+ * Essential Structure *
+ ***********************/
+.flexsearch--wrapper {
+	height: auto;
+
+
+	min-width: 200px;
+
+	overflow: hidden;
+	background: transparent;
+	padding-top: 5%;
+	position: static;
+	margin: 0 auto;
+}
+
+.flexsearch--form {
+	overflow: hidden;
+	position: relative;
+}
+
+.flexsearch--input-wrapper {
+	/*padding: 0 66px 0 0;  Right padding for submit button width */
+	overflow: hidden;
+}
+
+.flexsearch--input {
+  width: 100%;
+}
+
+/***********************
+ * Configurable Styles *
+ ***********************/
+.flexsearch {
+  padding: 0 25px 0 23px; /* Padding for other horizontal elements */
+  margin: 0 auto;
+}
+
+#search {
+  -webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	box-sizing: content-box;
+ 	height: 60px;
+  padding: 0 10px 0 10px;
+
+  border-radius: 35px; /* (height/2) + border-width */
+  border-style: solid;
+	border-width: 2px;
+
+
+   font-family: 'Indie Flower', cursive;
+
+	font-size:  calc(15px + .5vw);; /*dinamicki font*/
+	-webkit-appearance: none;
+	-moz-appearance: none;
+    width:90%;
+}
+
+.flexsearch--submit {
+  position: absolute;
+	right: 0;
+	top: 0;
+	display: block;
+	width: 60px;
+	height: 60px;
+  padding: 0;
+  border: none;
+	margin-top: 20px; /* margin-top + border-width */
+  margin-right: 5px; /* border-width */
+	background: transparent;
+  color: #888;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 40px;
+  line-height: 60px;
+  background-color: #f8f8f8;
+}
+
+.flexsearch--input:focus {
+  outline: none;
+  border-color: #333;
+}
+
+.flexsearch--input:focus.flexsearch--submit {
+ 	color: #333;
+}
+
+.flexsearch--submit:hover {
+  color: #333;
+  cursor: pointer;
+}
+
+::-webkit-input-placeholder {
+	color: #888;
+}
+
+input:-moz-placeholder {
+  color: #888
+}
+#main h1, h3 {
+	text-align: center;
+}
+#bottom-thumbnail {
+	margin-top: 80px;
+}
+
+@media screen and (max-width: 985px){
+ .sidenav{
+
+    display: none;
+  }
+  #main-container{width:100%;}
+  .dash{width:25%;}
+  .dash{display: none;}
+
+
+
+}
+
+@media screen and (min-width: 985px){
+	#msidenav{display: none;}
+
+}
+
+@media screen and (max-width:768px){
+	#container-dash{width: 100%;}
+
+}
+@media (min-width: 768px){
+.book .col-sm-3 {
+    width: 35%;
+}}
+
+@media (max-width: 480px){
+	.book-cover img{
+		padding-left: 15px;
+	}
 }

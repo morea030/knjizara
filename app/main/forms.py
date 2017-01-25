@@ -54,5 +54,5 @@ class CommentForm(Form):
     submit = SubmitField('Submit')    
 
 class SearchForm(Form):
-    search = StringField('search', validators = [DataRequired()]) 
+    search = StringField('search', validators = [DataRequired()],  render_kw={"placeholder": "Unesite ime knjige"})
        
