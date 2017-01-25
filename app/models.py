@@ -1,6 +1,8 @@
 # python run.py db migrate
 # python run.py db upgrade
 # inititalization python run.py db init
+# TODO zanrovi - implementirati pracenje i povezati sa sidebarom
+# TODO private messages
 
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash

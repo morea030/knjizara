@@ -1,3 +1,5 @@
+<!-- TODO srediti da se nakon prosirivanja side-bara skuplja i deo sa knjigama, ne samo search bar i nsalov -->
+
 {% extends "base.html" %}
 
 {% block page_content %}
@@ -10,11 +12,14 @@
 {%  endif %}
 
  <div class="row">
-        <div class="col-lg-8 col-md-6 col-sm-12">
+             <div class="col-lg-8 col-md-6 col-sm-12">
           <div id="main">
+
           <h1>BookSpaces</h1>
           <h3>Pretraži knjižare, nađi knjigu, uporedi cenu</h3>
           <hr>
+
+
             <div class="flexsearch">
               <div class="flexsearch--wrapper">
                 <form class="flexsearch--form" action="{{ url_for('.search') }}" method="post" name="search">
@@ -48,7 +53,15 @@
 <!--end bottom thumbnail-->
           </div>
 
-        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12" id="social">
+        <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12" id="social">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <h3>Najnoviji Komentari</h3>
+
         {% include '_posts.html' %}
        </div>
     </div>

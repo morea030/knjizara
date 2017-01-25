@@ -11,6 +11,7 @@ from ..decorators import admin_required, permission_required
 from .. import photos
 from werkzeug.utils import secure_filename
 import  os
+import random
 #from config import MAX_SEARCH_RESULTS
 MAX_SEARCH_RESULTS = 50
 
@@ -380,6 +381,9 @@ def book_page(book_id):
         posts = Post.query.filter_by(book_id = book_id).all()
         source = Source.query.filter_by(knjiga = book_id).all()
         autor_books = Knjige.query.filter_by(autor = author.id).all()
+        picture_num= random.randint(0, len(source)-1)
+        picture = source[picture_num].slika
+        print "data: ", picture_num, picture
         if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
             post = Post(body = post_form.body.data, book_id = book_id, author = current_user._get_current_object(),
                         timestamp = datetime.utcnow())
@@ -387,7 +391,7 @@ def book_page(book_id):
             db.session.commit()
             return redirect(url_for('.book_page', book_id=book_id))
         return render_template('book_page.html', book_title = book_title, book_autor= book_autor, source=source,
-                               autor_books=autor_books, posts=posts, post_form=post_form, item = book, author=author)
+                               autor_books=autor_books, posts=posts, post_form=post_form, item = book, author=author, picture=picture)
     else:
         abort(404)
 

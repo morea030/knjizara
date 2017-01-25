@@ -147,14 +147,14 @@ li.comment {
 	min-height: 100%;
 	box-shadow: 2px 2px 1px Black;
 	padding: 0px;
-	width:80%;
+	width:85%;
 	 height: 100%;
 	 font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 	 color: #818181;
 	}
 /* The side navigation menu for desktops and laptops */
 .sidenav {
-	margin-top: 0%;
+	margin-top: 10%;
 	max-width:25%;
 	float:left;
 	padding-bottom: 80px;
@@ -324,7 +324,10 @@ li.comment {
 ::-webkit-input-placeholder {
 	color: #888;
 }
+#social{
+    margin-left: 30px;
 
+}
 input:-moz-placeholder {
   color: #888
 }

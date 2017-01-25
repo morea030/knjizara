@@ -3,8 +3,22 @@
 
 {% block content %}
  <script src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.0.1/ckeditor.js"></script>
+<div class="main-content col-xs-12 col-md-8">
 
-<h1>{{ book_title }} <small>{{ book_autor }}</small></h1>
+          <div class="row">
+
+            <div class="col-xs-6 col-sm-6">
+
+               <img src="{{picture}}" alt="..." class="img-rounded">
+            </div>
+            <div class="col-xs-12 col-sm-4">
+              <h1>{{ book_title }} <small>{{ book_autor }}</small></h1>
+            </div>
+
+        </div>
+
+        <hr>
+
 {% if current_user.can(Permission.FOLLOW) %}
     {% if not current_user.is_following(item, 'item') %}
         <a href="{{ url_for('.follow', type='naziv', name=book_title) }}" class="btn btn-primary">
@@ -25,33 +39,47 @@
 {% endif %}
 
 {% for instance in source %}
-<p>{{ instance.cena }} {{ instance.website }} {{ instance.knjizara }}</p>
+     <div class="cene">
+ <h4> <a href="{{ instance.website }}"> {{ instance.knjizara }} </a>: <small>{{ instance.cena }}</small></h4>
+     </div>
 {% endfor %}
 
 {% include '_posts.html' %}
 
+<br>
 <div>{% if current_user.can(Permission.WRITE_ARTICLES)%}
+     <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+  Napiši komentar/recenziju
+</button>
+<div class="collapse" id="collapseExample">
+  <div class="well">
+
+
     <form class="form form-horizontal" method="post" role="form" data-provide="markdown">
   {{ post_form.hidden_tag() }}
   {{ wtf.form_errors(post_form, hiddens="only") }}
 
 
-<label class="control-label" for="body">Whats on your mind</label>
+<label class="control-label" for="bodys">Whats on your mind</label>
 
 {#          <div class="flask-pagedown"><textarea class="form-control flask-pagedown-input" id="flask-pagedown-body" data-provide="markdown" name="body" required></textarea></div>#}
 
-  <textarea class="form-control"  id="editor1" name="body" required>&lt;p&gt;Initial value.&lt;/p&gt;</textarea>
+  <textarea class="form-control"  id="editor1" name="bodys" required>&lt;p&gt;Initial value.&lt;/p&gt;</textarea>
 			<script type="text/javascript">
-				CKEDITOR.replace( 'body' );
+				CKEDITOR.replace( 'bodys' );
 			</script>
 
 
   {{ wtf.form_field(post_form.submit) }}
 </form>
-{% endif %}
+
+</div>
+</div>
+    {% endif %}
 </div>
 <p>Druge knjige autora</p>
 {% for book in autor_books %}
 <a href="{{url_for('.book_page', book_id=book.id)}}">{{ book.naziv }}</a>
 {% endfor %}
+</div>
 {% endblock %}
