@@ -67,7 +67,7 @@ class PasswordResetForm(Form):
 class ChangeEmailForm(Form):
     email = StringField('New Email', validators=[DataRequired(), Length(1,64),
                                                  Email()])
-    password = PasswordField('Password', validators=DataRequired())
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Update Email Address')
 
     def validate_email(self, field):

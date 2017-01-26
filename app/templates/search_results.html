@@ -1,20 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<h1><small>Search results for - </small>{{query}}:</h1>
-        <div class="search_results" style="margin-left: 5px; padding: 5px; ">
-            <ul class="list-unstyled">
+    <div class="row">
+        <div class="col-sm-8">
+          <div id="main">
+          <h1>BookSpaces</h1>
+	        <h2><small>Search results for - </small>{{query}}:</h2>
+        <hr>
+
+            <!-- Bottom thumnail section -->
+            <div class="row">
+
                 {% for result in results %}
-                    <li>
+                    <div class="col-sm-6 col-md-4">
                         <a href="{{ url_for('.book_page', book_id = result.id) }}">
-                            <p>
-                                <button type="button" class="btn btn-primary btn-lg">{{ result.naziv }}: {{ result.author.name }}</button>
-                            </p>
+                            <img src="{{ result.cene.first().slika}}" alt="{{ result.naziv }}" style="height:200px; width:120px; padding-bottom: 50px;">
+                            <div class="caption">
+                                <h3>{{ result.naziv}}</h3>
+                            </div>
                         </a>
-                    </li>
+                    </div>
                 {% endfor %}
-            </ul>
+                </div>
+
+
+
         </div>
-
-
+    </div>
+</div>
 {% endblock %}
