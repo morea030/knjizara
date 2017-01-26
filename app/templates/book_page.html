@@ -3,15 +3,15 @@
 
 {% block content %}
  <script src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.0.1/ckeditor.js"></script>
-<div class="main-content col-xs-12 col-md-8">
+<div class="main-content col-xs-12 col-md-5">
 
           <div class="row">
 
-            <div class="col-xs-6 col-sm-6">
+            <div class="col-xs-6 col-sm-5">
 
-               <img src="{{picture}}" alt="..." class="img-rounded">
+               <img src="{{picture}}" alt="..." class="img-rounded" style="height:250px; width:150px;">
             </div>
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-6">
               <h1>{{ book_title }} <small>{{ book_autor }}</small></h1>
             </div>
 
@@ -77,9 +77,18 @@
 </div>
     {% endif %}
 </div>
-<p>Druge knjige autora</p>
-{% for book in autor_books %}
-<a href="{{url_for('.book_page', book_id=book.id)}}">{{ book.naziv }}</a>
-{% endfor %}
+
 </div>
+    <div class="side-content col-xs-12 col-md-4 ">
+    <h3>Druge knjige autora {{ book_autor }}</h3>
+    <hr><br>
+    <div class="row">
+{% for book in autor_books %}
+    <div class="col-md-6">
+<a href="{{url_for('.book_page', book_id=book.id)}}"><img src="{{ book.cene.first().slika }}" style="width:140px; height:200px;padding-bottom: 10px;"></a>
+   </div>
+{% endfor %}
+    </div>
+    </div>
+
 {% endblock %}

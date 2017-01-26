@@ -374,8 +374,9 @@ def search_result(query):
 def book_page(book_id):
     post_form = PostForm()
     book = Knjige.query.filter_by(id=book_id).first()
-    author = Authors.query.filter_by(id=book.autor).first()
+
     if book:
+        author = Authors.query.filter_by(id=book.autor).first()
         book_title= book.naziv
         book_autor = author.name #book.autor
         posts = Post.query.filter_by(book_id = book_id).all()

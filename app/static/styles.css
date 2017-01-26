@@ -151,6 +151,7 @@ li.comment {
 	 height: 100%;
 	 font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 	 color: #818181;
+
 	}
 /* The side navigation menu for desktops and laptops */
 .sidenav {
@@ -327,6 +328,9 @@ li.comment {
 #social{
     margin-left: 30px;
 
+}
+.main-content{
+    margin-right: 15px;
 }
 input:-moz-placeholder {
   color: #888

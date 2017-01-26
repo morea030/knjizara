@@ -18,8 +18,8 @@
     </p>
     {% endif %}
 {% if current_user.can(Permission.FOLLOW) and user != current_user %}
-    {% if not current_user.is_following(user) %}
-        <a href="{{ url_for('.follow', username=user.username) }}" class="btn btn-primary">
+    {% if not current_user.is_following(user, "user") %}
+        <a href="{{ url_for('.follow',type="User", name=user.username) }}" class="btn btn-primary">
             Follow</a>
     {% else %}
         <a href="{{ url_for('.unfollow', username=user.username) }}" class="btn btn-default">
@@ -34,7 +34,7 @@
     Following <span class="badge">{{ user.followed.count()   }}</span>
 </a>
 {% if current_user.is_authenticated and user != current_user and
-        user.is_following(current_user) %}
+        user.is_following(current_user,"user") %}
         <span class ='label label-default'>Follows you</span>
 {% endif %}
     {% if current_user.is_administrator() %}

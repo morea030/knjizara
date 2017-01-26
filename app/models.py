@@ -3,6 +3,7 @@
 # inititalization python run.py db init
 # TODO zanrovi - implementirati pracenje i povezati sa sidebarom
 # TODO private messages
+# TODO knjizara.com
 
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -195,7 +196,6 @@ class User(UserMixin,db.Model):
         return True
 
     def can(self, permissions):
-        print "can"
         return self.role is not None and \
                (self.role.permissions & permissions) == permissions
 
@@ -498,8 +498,9 @@ class Comment(db.Model):
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
-
-
+#
+#
 @login_manager.user_loader
 def load_user(user_id):
+
     return User.query.get(int(user_id))
