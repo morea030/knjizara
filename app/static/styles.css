@@ -90,8 +90,8 @@ div.comment-thumbnail {
 div.comment-content {
     margin-left: 108px;
     min-height: 108px;
-    background-color: #CC8F4D;
-    border-radius: 12px;
+    border-radius: 15px;
+    background-color: white;
     padding: 10px;
 }
 
@@ -104,9 +104,9 @@ div.pagination {
 }
 
 li.comment {
-    background-color: #E3EAD4;
+
     margin: 10px;
-    border-radius: 10px;
+    background-color: #eaeaea;
     padding: 10px;
 }
 
@@ -343,6 +343,14 @@ input:-moz-placeholder {
 #bottom-thumbnail {
 	margin-top: 80px;
 }
+
+.caption h3{
+    text-align:left;
+    margin-top: 0;
+    margin-bottom: 40px;
+
+}
+
 
 @media screen and (max-width: 985px){
  .sidenav{

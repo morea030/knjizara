@@ -4,6 +4,7 @@
 # TODO zanrovi - implementirati pracenje i povezati sa sidebarom
 # TODO private messages
 # TODO knjizara.com
+# cene knjiga
 
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -221,15 +222,15 @@ class User(UserMixin,db.Model):
         return url_for('static', filename='uploads/{image}'.format(image=self.image))
 
     def follow(self, user, type):
-        print 'Follow'
+
         f = None
         if type == 'user':
             if not self.is_following(user, type):
                 f = Follow(follower=self, followed = user)
         elif type == 'item' or type == 'author':
-            print 'Follow item'
+
             if not self.is_following(user, type):
-                print 'is not following'
+
                 if type == 'item':
                     f = FollowItems(follower_item=self, followed_id=user.id)
                 elif type == 'author':
@@ -252,7 +253,7 @@ class User(UserMixin,db.Model):
         if type == 'user':
             return self.followed.filter_by(followed_id=user.id).first() is not None
         elif type == 'item':
-            print "ITEM"
+
             return self.following_item.filter_by(followed_id=user.id).first() is not None
         elif type == 'author':
 

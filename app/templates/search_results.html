@@ -14,11 +14,14 @@
                 {% for result in results %}
                     <div class="col-sm-6 col-md-4">
                         <a href="{{ url_for('.book_page', book_id = result.id) }}">
-                            <img src="{{ result.cene.first().slika}}" alt="{{ result.naziv }}" style="height:200px; width:120px; padding-bottom: 50px;">
+
+                            <img src="{{ result.cene.first().slika}}" alt="{{ result.naziv }}" style="height:200px; width:120px; padding-bottom: 20px;">
+
                             <div class="caption">
                                 <h3>{{ result.naziv}}</h3>
                             </div>
                         </a>
+                     <hr>
                     </div>
                 {% endfor %}
                 </div>
