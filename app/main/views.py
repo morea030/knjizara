@@ -204,7 +204,7 @@ def edit(id):
 @permission_required(Permission.FOLLOW)
 def follow(type, name):
     #print type, name
-    if type == 'User':
+    if type == 'user':
         user = User.query.filter_by(username=name).first()
         if user is None:
             flash('Invalid user')
@@ -247,7 +247,7 @@ def follow(type, name):
 @permission_required(Permission.FOLLOW)
 def unfollow(type, name):
     item = None
-    if type == 'User':
+    if type == 'user':
         item = User.query.filter_by(username=name).first()
 
         if item == current_user:
@@ -413,6 +413,7 @@ def dashboard(username):
         if not show_users:
             user = current_user.followed_posts
             users_filter=False
+            print "Users ", user.all()
         show_books = bool(request.cookies.get('books', ''))
         if not show_books:
             items = current_user.followed_items
@@ -423,8 +424,8 @@ def dashboard(username):
             authors_filter=False
 
         posts = user.union_all(items, authors).order_by(Post.timestamp.desc())
-        print "POSTS is ", posts
-        print "user is", user, "items are ", items, "authors are ", authors
+        #print "POSTS is ", posts
+        #print "user is", user, "items are ", items, "authors are ", authors
     else:
         posts = Post.query.order_by(Post.timestamp.desc())
     # pagination = query.order_by(Post.timestamp.desc()).paginate(

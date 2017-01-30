@@ -240,7 +240,7 @@ class User(UserMixin,db.Model):
 
     def unfollow(self, user, type):
         f = None
-        if type == 'User':
+        if type == 'user':
             f = self.followed.filter_by(followed_id=user.id).first()
         elif type == 'naziv':
             f = self.following_item.filter_by(followed_id=user.id).first()
