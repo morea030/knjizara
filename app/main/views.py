@@ -11,6 +11,7 @@ from ..decorators import admin_required, permission_required
 from .. import photos
 from werkzeug.utils import secure_filename
 import  os
+import random
 #from config import MAX_SEARCH_RESULTS
 MAX_SEARCH_RESULTS = 50
 
@@ -21,6 +22,9 @@ MAX_SEARCH_RESULTS = 50
 def index():
     #post_form = PostForm()
     search_form = SearchForm()
+    books = Knjige.query.order_by(Knjige.timestamp.desc()).limit(6)
+    posts = Post.query.order_by(Post.timestamp.desc()).limit(6)
+
     #
     # if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
     #     print "HIT"
@@ -45,7 +49,7 @@ def index():
     #     page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     # posts = pagination.items
 
-    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow())
+    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow(), books=books, posts=posts)
 
 
 
@@ -360,6 +364,7 @@ def search():
 
 @main.route('/search_results/<query>')    
 def search_result(query):
+    print "SEARCH"
     search = True
     results= Knjige.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
     print results
@@ -368,47 +373,80 @@ def search_result(query):
 def book_page(book_id):
     post_form = PostForm()
     book = Knjige.query.filter_by(id=book_id).first()
-    author = Authors.query.filter_by(id=book.autor).first()
+    print "Data is ", post_form.body.data
+
     if book:
+        author = Authors.query.filter_by(id=book.autor).first()
         book_title= book.naziv
         book_autor = author.name #book.autor
         posts = Post.query.filter_by(book_id = book_id).all()
         source = Source.query.filter_by(knjiga = book_id).all()
         autor_books = Knjige.query.filter_by(autor = author.id).all()
+        picture_num= random.randint(0, len(source)-1)
+        picture = source[picture_num].slika
+        print "data: ", picture_num, picture
         if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
+            print "he sure can"
             post = Post(body = post_form.body.data, book_id = book_id, author = current_user._get_current_object(),
                         timestamp = datetime.utcnow())
             db.session.add(post)
             db.session.commit()
             return redirect(url_for('.book_page', book_id=book_id))
         return render_template('book_page.html', book_title = book_title, book_autor= book_autor, source=source,
-                               autor_books=autor_books, posts=posts, post_form=post_form, item = book, author=author)
+                               autor_books=autor_books, posts=posts, post_form=post_form, item = book, author=author, picture=picture)
     else:
         abort(404)
 
 @main.route('/dashboard/<username>')
 @login_required
 def dashboard(username):
+    books_filter = users_filter = authors_filter = True
     items = None
     show_followed = False
     # page = request.args.get('page', 1, type=int)
     # if current_user.is_authenticated:
     show_followed = bool(request.cookies.get('show_followed', ''))
     if show_followed:
-        query = current_user.followed_posts
-        items = current_user.followed_items
-        authors = current_user.followed_authors
-        print authors
-        posts = query.union_all(items, authors).order_by(Post.timestamp.desc())
+        user =items=authors=db.session.query(Post).filter_by(id=0)
+    # TODO user iako filtriran moze da se provuce kroz zapracene knjige/autore, razmisli da li je to zeljeno ponasanje
+        show_users = bool(request.cookies.get('users', ''))
+        if not show_users:
+            user = current_user.followed_posts
+            users_filter=False
+        show_books = bool(request.cookies.get('books', ''))
+        if not show_books:
+            items = current_user.followed_items
+            books_filter=False
+        show_authors = bool(request.cookies.get('authors', ''))
+        if not show_authors:
+            authors = current_user.followed_authors
+            authors_filter=False
 
+        posts = user.union_all(items, authors).order_by(Post.timestamp.desc())
+        print "POSTS is ", posts
+        print "user is", user, "items are ", items, "authors are ", authors
     else:
         posts = Post.query.order_by(Post.timestamp.desc())
     # pagination = query.order_by(Post.timestamp.desc()).paginate(
         # page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
-    return render_template('dashboard.html', posts=posts,  show_followed=show_followed, username=username)
+    return render_template('dashboard.html', posts=posts,  show_followed=show_followed, username=username,books_filter=books_filter,
+                           authors_filter=authors_filter, users_filter=users_filter)
 
 
+@main.route('/filter/<item>')
+@login_required
+def filter(item):
+    resp = make_response(redirect(request.referrer))
+    resp.set_cookie('%s' % item, '1', max_age=30*24*60*60)
+    return resp
+
+@main.route('/unfilter/<item>')
+@login_required
+def unfilter(item):
+    resp = make_response(redirect(request.referrer))
+    resp.set_cookie('%s' % item, '', max_age=30*24*60*60)
+    return resp
 
         
 # @app.errorhandler(40Permissio4)

@@ -3,7 +3,8 @@
 {% import "_macros.html" as macros %}
 
 {% block page_content %}
-
+<div class="row">
+<div class="col-sm-7">
 <div class="post-tabs">
   <ul class="nav nav-tabs">
     <li {% if not show_followed %} class="active" {% endif %}>
@@ -15,11 +16,34 @@
     </li>
     {% endif %}
   </ul>
+{% if show_followed %}
+<br>
+    {% if users_filter %}
+        <a href="{{url_for('.unfilter', item="users")}}"><button type="button"  class="btn btn-dangerous">Korisnici</button></a>
+    {% else %}
+        <a href="{{url_for('.filter', item="users")}}"><button type="button"  class="btn btn-info" data-toggle="tooltip" data-placement="left" title="Filtriraj zapraćene korisnike" >Korisnici</button></a>
+    {% endif %}
+    {% if books_filter %}
+        <a href="{{url_for('.unfilter', item="books")}}"><button type="button"  class="btn btn-dangerous" >Knjige</button></a>
+    {% else %}
+        <a href="{{url_for('.filter', item="books")}}"><button type="button"  class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Filtriraj zapraćene knjige">Knjige</button></a>
+    {%  endif %}
+    {% if authors_filter %}
+        <a href="{{url_for('.unfilter', item="authors")}}"><button type="button"  class="btn btn-dangerous">Autori</button></a>
+    {% else %}
+       <a href="{{url_for('.filter', item="authors")}}"><button type="button"  class="btn btn-info" data-toggle="tooltip" data-placement="right" title="Filtriraj zapraćene autore">Autori</button></a>
+    {% endif %}
+{% endif %}
 </div>
 
-
+<div class="col-xs-12 col-md-10">
 {% include '_posts.html' %}
+    </div>
+    </div>
+<div class="col-sm-2">
 
+</div>
+</div>
 
 {#<div class="pagination">
     {{ macros.pagination_widget(pagination,'.dashboard', username=username) }}

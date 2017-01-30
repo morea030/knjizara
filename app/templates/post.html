@@ -7,7 +7,8 @@
 
 {% block page_content %}
 <script src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.0.1/ckeditor.js"></script>
-
+<div class="row">
+<div class="col-xs-8">
 {% include '_posts.html' %}
 <h4 id='comments'>Comments</h4>
 {% if current_user.can(Permission.COMMENT) %}
@@ -32,5 +33,6 @@
 	{{macros.pagination_widget(pagination, '.post', fragment='#comments', id = posts[0].id)}}
 </div>
 {% endif %}	
-
+</div>
+</div>
 {% endblock %}

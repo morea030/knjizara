@@ -1,3 +1,4 @@
+<div class ="container">
 <ul class="comments">
 	{% for comment in comments recursive %}
 
@@ -46,8 +47,9 @@
 				<a class="btn btn-danger btn-xs" href="{{url_for('.moderate_disable', id=comment.id, page=page)}}">Disable</a>
 				{% endif %}
 			{% endif %}	
-		</div>
+
 	</li>
 	
 	{% endfor %}
-</ul>					
+</ul>
+</div>

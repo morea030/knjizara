@@ -3,8 +3,22 @@
 
 {% block content %}
  <script src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.0.1/ckeditor.js"></script>
+<div class="main-content col-xs-12 col-md-5">
 
-<h1>{{ book_title }} <small>{{ book_autor }}</small></h1>
+          <div class="row">
+
+            <div class="col-xs-6 col-sm-5">
+
+               <img src="{{picture}}" alt="..." class="img-rounded" style="height:250px; width:150px;">
+            </div>
+            <div class="col-xs-12 col-sm-6">
+              <h1>{{ book_title }} <small>{{ book_autor }}</small></h1>
+            </div>
+
+        </div>
+
+        <hr>
+
 {% if current_user.can(Permission.FOLLOW) %}
     {% if not current_user.is_following(item, 'item') %}
         <a href="{{ url_for('.follow', type='naziv', name=book_title) }}" class="btn btn-primary">
@@ -25,12 +39,22 @@
 {% endif %}
 
 {% for instance in source %}
-<p>{{ instance.cena }} {{ instance.website }} {{ instance.knjizara }}</p>
+     <div class="cene">
+ <h4> <a href="{{ instance.website }}"> {{ instance.knjizara }} </a>: <small>{{ instance.cena }}</small></h4>
+     </div>
 {% endfor %}
 
 {% include '_posts.html' %}
 
+<br>
 <div>{% if current_user.can(Permission.WRITE_ARTICLES)%}
+     <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+  Napiši komentar/recenziju
+</button>
+<div class="collapse" id="collapseExample">
+  <div class="well">
+
+
     <form class="form form-horizontal" method="post" role="form" data-provide="markdown">
   {{ post_form.hidden_tag() }}
   {{ wtf.form_errors(post_form, hiddens="only") }}
@@ -48,10 +72,23 @@
 
   {{ wtf.form_field(post_form.submit) }}
 </form>
-{% endif %}
+
 </div>
-<p>Druge knjige autora</p>
+</div>
+    {% endif %}
+</div>
+
+</div>
+    <div class="side-content col-xs-12 col-md-4 ">
+    <h3>Druge knjige autora {{ book_autor }}</h3>
+    <hr><br>
+    <div class="row">
 {% for book in autor_books %}
-<a href="{{url_for('.book_page', book_id=book.id)}}">{{ book.naziv }}</a>
+    <div class="col-md-6">
+<a href="{{url_for('.book_page', book_id=book.id)}}"><img src="{{ book.cene.first().slika }}" style="width:140px; height:200px;padding-bottom: 10px;"></a>
+   </div>
 {% endfor %}
+    </div>
+    </div>
+
 {% endblock %}

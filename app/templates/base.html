@@ -1,48 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{% extends "bootstrap/base.html" %}
+{#{% extends "bootstrap/base.html" %}#}
+{##}
+{#{% block title %}#}
+{#    {{ super() }}#}
+{#    {% if p_title %}#}
+{#        BookSpaces {{p_title}}#}
+{#    {% else %}#}
+{#     BookSpaces#}
+{#    {% endif %}#}
+{#{% endblock %}#}
+{##}
+{#{% block head %}#}
+{#{{ super() }}#}
 
-{% block title %}
-    {{ super() }}
-    {% if p_title %}
-        Knjižara {{p_title}}
-    {% else %}
-     Knjizara
-    {% endif %}
-{% endblock %}
-
-{% block head %}
-{{ super() }}
-<link rel="shorcut icon" href = "{{ url_for('static', filename='img/book-icon.ico') }}"
+<link rel="icon" href = "{{ url_for('static', filename='img/favicon.ico') }}"
       type = "image/x-icon">
-<link rel="icon" href = "{{ url_for('static', filename='img/book-icon.png') }}"
-      type = "image/x-icon">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-{% endblock %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<script src="https://use.fontawesome.com/40b9390263.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-{% block scripts %}
-{{ super() }}
-{{ moment.include_moment() }}
-    {{ moment.lang('sr')}}
-{% endblock %}
-
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+{#{% endblock %}#}
+{##}
+{#{% block scripts %}#}
+{#{{ super() }}#}
+{#{{ moment.include_moment() }}#}
+{#    {{ moment.lang('sr')}}#}
+{#{% endblock %}#}
+</head>
+<body style="background-image: url({{url_for('static', filename='img/library2.jpg')}})">
 {% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle"
-            data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Knjižara</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-                {% if current_user.is_authenticated %}
+ <div class="container" id='main-container'>
+  <nav class="navbar navbar-default" id="main-nav">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">BookSpaces</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+          <li><a href="#">Link</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Action</a></li>
+              <li><a href="#">Another action</a></li>
+              <li><a href="#">Something else here</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">Separated link</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">One more separated link</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+                          {% if current_user.is_authenticated %}
+
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <img src="{{ current_user.gravatar(size=18) }}" style="width:24px;height:24px;">
@@ -67,50 +93,130 @@
                     <a href="{{ url_for('auth.login') }}"> Sign In</a>
                 </li>
                 {% endif %}
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+<div class="page-container">
 
-            </ul>
+    <div class="row">
+
+        <div class="sidenav">
+        <h1>Žanrovi</h1>
+        <a href="#">Beletristika</a>
+        <a href="#">Fantastika i horor</a>
+        <a href="#">Akcija</a>
+        <a href="#">Krimi</a>
+        <a href="#">Erotski</a>
+        <a href="#">Domaći</a>
+        <a href="#">Klasici</a>
+        <a href="#">Klasici</a>
+
+
+
         </div>
-    </div>
-</div>
+        <div id="msidenav">
+      <div id="mySidenav" class="msidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="#">About</a>
+        <a href="#">Services</a>
+        <a href="#">Clients</a>
+        <a href="#">Contact</a>
+      </div>
+
+<!-- Use any element to open the sidenav -->
+
+     <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+       </div>
+
+
 {% endblock %}
-<div class="container">
+
+{#<div class="container">#}
 {% block content %}
 
 {% for message in get_flashed_messages() %}
+    <div class="container">
     <div class = "alert alert-warning">
         <button type ="button" class = "close" data-dismiss="alert">&times;</button>
         {{ message }}
-
+    </div>
     </div>
 {% endfor %}
 {% block page_content %}{% endblock %}
 
 {% endblock %}
+{#</div>#}
 </div>
+</div>
+<!-- Footer -->
+ <footer class="page-footer" >
+
+          <div id='footer'>
+            <div class="row" id="footer-row">
+              <div class="col l6 s12">
+                <h5 class="white-text">Footer Content</h5>
+                <p class="grey-text text-lighten-4">You can use rows and columns here to organize your footer content.</p>
+              </div>
+              <h5 class="white-text">Links</h5>
+              <div class="row">
+
+                <ul>
+                <div class="col-lg-3 col-md-4 col-xs-6">
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 1</a></li>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-xs-6">
+
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 2</a></li>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-xs-6">
+
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 3</a></li>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-xs-6">
 
 
-{##}
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 4</a></li>
+                </div>
+                </ul>
+                 <ul>
+
+                  <div class="col-lg-3 col-md-4 col-xs-6">
+
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 1</a></li>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-xs-6">
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 2</a></li>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-xs-6">
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 3</a></li>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-xs-6">
+
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 4</a></li>
+                </div>
+                </ul>
+              </div>
+            </div>
+
+          <div class="footer-copyright">
+            <div class="container">
+            © 2014 Copyright Text
+            <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+            </div>
+             </div>
+          </div>
+        </footer>
+
+      </div>
+
+
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="{{url_for('static', filename='js/main.js')}}"></script>
+</body>
+</html>
 {#    <meta charset="UTF-8">#}
-{#    {% if title %}#}
-{#    <title>Knjižara - {{title}}</title>#}
-{#    {% else %}#}
-{#    <title>Knjižara</title>#}
-{#    {% endif %}#}
-{##}
-{#</head>#}
-{#<body>#}
-{#<div><a href="/index">Knjižara</a> </div>#}
-{#<hr>#}
-{#{% with messages = get_flashed_messages() %} <!-- sets messages within with scope, they are not seen outside of it -->#}
-{#    {% if messages %}#}
-{#         <ul>#}
-{#        {% for message in messages %}#}
-{#            <li>{{ message }}</li>#}
-{#        {% endfor %}#}
-{#         </ul>#}
-{#    {% endif %}#}
-{#{% endwith %}#}
-{##}
-{#{% block content %} {% endblock %}#}
-{#</body>#}
-{#</html>#}
