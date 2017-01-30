@@ -409,7 +409,7 @@ def dashboard(username):
     show_followed = bool(request.cookies.get('show_followed', ''))
     if show_followed:
         user =items=authors=db.session.query(Post).filter_by(id=0)
-
+    # TODO user iako filtriran moze da se provuce kroz zapracene knjige/autore, razmisli da li je to zeljeno ponasanje
         show_users = bool(request.cookies.get('users', ''))
         if not show_users:
             user = current_user.followed_posts
