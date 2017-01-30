@@ -364,7 +364,6 @@ def search_result(query):
     results= Knjige.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
     print results
     return render_template('search_results.html', query=query, results=results, search=search)
-
 @main.route('/book_page/<book_id>', methods = ['POST', 'GET'])
 def book_page(book_id):
     post_form = PostForm()
