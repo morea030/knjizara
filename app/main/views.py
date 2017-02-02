@@ -1,20 +1,22 @@
 # not covered in book https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n
 from . import main
 from ..mail import send_mail
-from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g
+from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g, session
 from datetime import datetime
 from ..models import User, Role, Permission, Post, Comment, Knjige, Source, Authors
 from flask_login import login_required, current_user
 from forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, SearchForm
-from ..  import db
+from ..  import db,socketio
 from ..decorators import admin_required, permission_required
 from .. import photos
 from werkzeug.utils import secure_filename
 import  os
 import random
+# from run import socketio
+from flask_socketio import emit
 #from config import MAX_SEARCH_RESULTS
 MAX_SEARCH_RESULTS = 50
-
+thread=None
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -49,7 +51,7 @@ def index():
     #     page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     # posts = pagination.items
 
-    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow(), books=books, posts=posts)
+    return render_template("index.html", search_form=search_form, current_time=datetime.utcnow(), books=books, posts=posts, async_mode=socketio.async_mode)
 
 
 
@@ -442,6 +444,7 @@ def filter(item):
     resp.set_cookie('%s' % item, '1', max_age=30*24*60*60)
     return resp
 
+
 @main.route('/unfilter/<item>')
 @login_required
 def unfilter(item):
@@ -449,7 +452,37 @@ def unfilter(item):
     resp.set_cookie('%s' % item, '', max_age=30*24*60*60)
     return resp
 
-        
+
+def background_thread():
+    count = 0
+    while True:
+        print "thread"
+        socketio.sleep(10)
+        count += 1
+        socketio.emit('my_response', {'data': 'Server generated event', 'count': count}, namespace='/test')
+
+
+@socketio.on('connect', namespace='/test')
+def test_connect():
+    print "connected"
+    global thread
+    if thread is None:
+        thread = socketio.start_background_task(target=background_thread)
+        emit('my_response', {'data': 'Connected', 'count': 0})
+
+
+# @socketio.on('connect', namespace='/test')
+# def test_connected():
+#     print "CONNECT"
+#     emit('my_response', {'data': 'Connected'})
+
+
+@socketio.on('my_event', namespace='/test')
+def test_message(message):
+    print "EVENT ", message
+    session['recive_count'] = session.get('recive_count', 0)+1
+    emit('my_response', {'data': message['data'], 'count': session['recive_count']})
+
 # @app.errorhandler(40Permissio4)
 # def page_not_found(e):
 #     print "not found"

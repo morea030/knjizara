@@ -9,6 +9,7 @@ from flask_login import LoginManager
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_pagedown import PageDown
 import flask_whooshalchemy as whooshalchemy
+from flask_socketio import SocketIO
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -20,7 +21,8 @@ login_manager.session_protection='basic'
 login_manager.login_view='auth.login'
 photos = UploadSet('photos', IMAGES)
 pagedown = PageDown()
-
+socketio = SocketIO()
+async_mode=None
 
 
 def create_app(config_name):
@@ -29,14 +31,14 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     bootstrap.init_app(app)
-    mail.init_app(app)
+    #mail.init_app(app)
     moment.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     configure_uploads(app, photos)
     pagedown.init_app(app)
-
+    socketio.init_app(app, async_mode=async_mode)
     from models import Knjige
     whooshalchemy.whoosh_index(app, Knjige)
 

@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 <script src="https://use.fontawesome.com/40b9390263.js"></script>
+     <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
@@ -30,6 +32,22 @@
 {#{{ moment.include_moment() }}#}
 {#    {{ moment.lang('sr')}}#}
 {#{% endblock %}#}
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function(){
+        namespace = '/test';
+        var socket= io.connect(location.protocol+ '//' + document.domain + ':' + location.port + namespace);
+        console.log(socket);
+        console.log(location.protocol+ '//' + document.domain + ':' + location.port + namespace);
+        socket.on('connect', function(){
+            socket.emit('my_event', {data: 'I \'m connected!'});
+            console.log('emmiting');
+        });
+        socket.on('my_response', function(msg){
+            $('#log').append('<br>'+ $('<div/>').text('Recived #' + msg.count + ':' + msg.data).html());
+        });
+
+        })
+</script>
 </head>
 <body style="background-image: url({{url_for('static', filename='img/library2.jpg')}})">
 {% block navbar %}
@@ -143,6 +161,7 @@
     </div>
     </div>
 {% endfor %}
+    <div id="log">cloth</div>
 {% block page_content %}{% endblock %}
 
 {% endblock %}
