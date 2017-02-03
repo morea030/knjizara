@@ -3,7 +3,7 @@ from . import main
 from ..mail import send_mail
 from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g, session
 from datetime import datetime
-from ..models import User, Role, Permission, Post, Comment, Knjige, Source, Authors
+from ..models import User, Role, Permission, Post, Comment, Knjige, Source, Authors, Notification
 from flask_login import login_required, current_user
 from forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, SearchForm
 from ..  import db,socketio
@@ -159,6 +159,7 @@ def post(id):
     if form.validate_on_submit():
         comment = Comment(body = form.body.data, post = post, author=current_user._get_current_object())
         db.session.add(comment)
+
         flash('Your comment has been published')
         return redirect(url_for('.post', id=post.id, page=-1))
     page = request.args.get('page', 1, type=int)
@@ -178,8 +179,12 @@ def comment(id):
     post = Post.query.filter_by(id=parrent_comment.post_id).first()
     form = CommentForm()
     if form.validate_on_submit():
+        print "COMMENT VIEW"
         comment = Comment(body=form.body.data, post=post, author = current_user._get_current_object(), parrent_id=parrent_comment.id)
         db.session.add(comment)
+        print "COMMENT IS ", comment, "and name is ", comment.author.id
+        notification = Notification(sender=comment.author.id, reciver= parrent_comment.author_id, type='Cooment', flag='Unread' )
+        db.session.add(notification)
         flash('Your comment has been added')
         return redirect(url_for('.post', id=post.id))
 
@@ -453,22 +458,22 @@ def unfilter(item):
     return resp
 
 
-def background_thread():
-    count = 0
-    while True:
-        print "thread"
-        socketio.sleep(10)
-        count += 1
-        socketio.emit('my_response', {'data': 'Server generated event', 'count': count}, namespace='/test')
+# def background_thread():
+#     count = 0
+#     while True:
+#         # print "thread"
+#         socketio.sleep(10)
+#         count += 1
+#         socketio.emit('my_response', {'data': 'Server generated event', 'count': count}, namespace='/test')
 
 
 @socketio.on('connect', namespace='/test')
 def test_connect():
     print "connected"
-    global thread
-    if thread is None:
-        thread = socketio.start_background_task(target=background_thread)
-        emit('my_response', {'data': 'Connected', 'count': 0})
+    # global thread
+    # if thread is None:
+    #     thread = socketio.start_background_task(target=background_thread)
+    #     emit('my_response', {'count': 0})
 
 
 # @socketio.on('connect', namespace='/test')
@@ -481,7 +486,7 @@ def test_connect():
 def test_message(message):
     print "EVENT ", message
     session['recive_count'] = session.get('recive_count', 0)+1
-    emit('my_response', {'data': message['data'], 'count': session['recive_count']})
+    emit('my_response', {'count': session['recive_count']})
 
 # @app.errorhandler(40Permissio4)
 # def page_not_found(e):

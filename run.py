@@ -1,7 +1,7 @@
 # server startujemo python run.py  runserver
 import os
 from app import create_app, db, socketio
-from app.models import User, Post, Knjige, Source, Role, Comment
+from app.models import User, Post, Knjige, Source, Role, Comment, Notification
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 from flask_socketio import SocketIO
@@ -12,7 +12,8 @@ migrate = Migrate(app, db)
 # socketio =SocketIO(app, async_mode=async_mode)
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Post=Post, Knjige=Knjige, Source=Source, Role=Role, Comment=Comment)
+    return dict(app=app, db=db, User=User, Post=Post, Knjige=Knjige, Source=Source, Role=Role, Comment=Comment,
+                Notification=Notification)
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 #manager.add_command(('migrate'))

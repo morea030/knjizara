@@ -5,7 +5,7 @@
 # TODO private messages
 # TODO knjizara.com
 # cene knjiga
-
+import app
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
@@ -17,6 +17,7 @@ import hashlib
 # from markdown import markdown
 import bleach
 import urllib2
+from flask_sqlalchemy import before_models_committed
 # from slugify import slugify
 import flask_whooshalchemy as whooshalchemy
 
@@ -75,7 +76,27 @@ class Authors(db.Model):
     books = db.relationship('Knjige', backref='author', lazy='dynamic')
     followers = db.relationship('FollowAuthors', foreign_keys=[FollowAuthors.author_id],
                                backref=db.backref('authors', lazy='joined'),
+
+
                                lazy='dynamic', cascade='all, delete-orphan')
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.Integer, db.ForeignKey('user.id'))
+    reciver = db.Column(db.Integer, db.ForeignKey('user.id'))
+    type = db.Column(db.VARCHAR(36)) # upvote, downvote, private message, commented comment ...
+    flag=db.Column(db.VARCHAR(8)) # read or unread
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __commit_insert__(self):
+
+        unread_msgs=Notification.query.filter_by(reciver=self.reciver).all()
+        print unread_msgs, "reciver is ", self.reciver, self.flag, self.sender
+
+@db.event.listens_for(Notification,'after_insert')
+def before_commit(mapper,connection, target):
+    target.__commit_insert__()
 
 
 
@@ -116,6 +137,8 @@ class User(UserMixin,db.Model):
                                lazy='dynamic', cascade='all, delete-orphan')
 
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    notification_reciver = db.relationship("Notification",foreign_keys=[Notification.reciver], backref='user',lazy='dynamic')
+    notification_sender = db.relationship("Notification", foreign_keys=[Notification.sender], backref='issuer', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -495,6 +518,8 @@ class Comment(db.Model):
             return count       
         return count      
         
+
+
 
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
