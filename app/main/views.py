@@ -12,6 +12,7 @@ from .. import photos
 from werkzeug.utils import secure_filename
 import  os
 import random
+
 # from run import socketio
 from flask_socketio import emit
 #from config import MAX_SEARCH_RESULTS
@@ -26,34 +27,7 @@ def index():
     search_form = SearchForm()
     books = Knjige.query.order_by(Knjige.timestamp.desc()).limit(6)
     posts = Post.query.order_by(Post.timestamp.desc()).limit(6)
-
-    #
-    # if current_user.can(Permission.WRITE_ARTICLES) and post_form.validate_on_submit():
-    #     print "HIT"
-    #     post = Post(body = post_form.body.data, author=current_user._get_current_object(), timestamp=datetime.utcnow())
-    #     db.session.add(post)
-    #     db.session.commit()
-    #     return redirect(url_for('.index'))
-    #posts = Post.query.order_by(Post.timestamp.desc()).all()
-#pagination = Post.query.order_by(Post.timestamp.desc()).paginate(page, per_page=current_app.config['POSTS_PER_PAGE'],
-                                                                     # error_out=False)
-    #posts = pagination.items
-
-    # show_followed = False
-    # page = request.args.get('page', 1, type=int)
-    # if current_user.is_authenticated:
-    #     show_followed = bool(request.cookies.get('show_followed', ''))
-    # if show_followed:
-    #     query=current_user.followed_posts
-    # else:
-    #     query = Post.query
-    # pagination =  query.order_by(Post.timestamp.desc()).paginate(
-    #     page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
-    # posts = pagination.items
-
     return render_template("index.html", search_form=search_form, current_time=datetime.utcnow(), books=books, posts=posts, async_mode=socketio.async_mode)
-
-
 
 
 @main.route('/all')
@@ -172,6 +146,7 @@ def post(id):
     return render_template('post.html', posts=[post], post_form = form,
         comments=comments, pagination=pagination, Comment=Comment)
 
+
 @main.route('/comment/<int:id>', methods=['POST','GET'])
 @login_required
 def comment(id):
@@ -206,6 +181,7 @@ def edit(id):
     form.body.data = post.body
     return render_template('edit_post.html', form = form, post=post)
 
+
 @main.route('/follow/<type>/<name>')
 @login_required
 @permission_required(Permission.FOLLOW)
@@ -226,7 +202,6 @@ def follow(type, name):
 
         kwargs = {type : name}
         item = Knjige.query.filter_by(**kwargs).first()
-        #print "ITEM is ", item
         if item is None:
             flash('invalid %s' % type)
             return redirect(request.referrer)
@@ -248,6 +223,7 @@ def follow(type, name):
 
     print "REQUEST REFFERER IS ", request.referrer
     return redirect(request.referrer)
+
 
 @main.route('/unfollow/<type>/<name>')
 @login_required
@@ -277,6 +253,7 @@ def unfollow(type, name):
     flash('You have unfollowed %s' % type)
     return redirect(request.referrer)
 
+
 @main.route('/followers/<username>')
 def followers(username):
     user = User.query.filter_by(username=username).first()
@@ -291,6 +268,8 @@ def followers(username):
     return render_template('followers.html', user=user, title='Followers of',
                            endpoint ='.followers', pagination=pagination,
                            follows = follows)
+
+
 @main.route('/followed-by/<username>')
 def followed_by(username):
     user = User.query.filter_by(username=username).first()
@@ -305,6 +284,7 @@ def followed_by(username):
     return render_template('followers.html', user=user, tile='Followed by',
                            endpoint = '.followed_by', pagination=pagination,
                            follows=follows)
+
 
 @main.route('/moderate')
 @login_required
@@ -353,6 +333,7 @@ def moderate_disabled():
     resp.set_cookie('show_disabled', '1', max_age= 30*24*60*60)
     return resp
 
+
 @main.route('/moderate/show_all')
 @login_required
 @permission_required(Permission.MODERATE_COMMENTS)
@@ -362,12 +343,14 @@ def moderate_all():
     resp.set_cookie('show_disabled', '', max_age = 30*24*60*60)
     return resp
 
+
 @main.route('/search', methods=['POST'])
 def search():
     search_form = SearchForm()
     if not search_form.validate_on_submit():
         return redirect(url_for('.index'))
     return redirect(url_for('.search_result',query = search_form.search.data))    
+
 
 @main.route('/search_results/<query>')    
 def search_result(query):
@@ -376,6 +359,8 @@ def search_result(query):
     results= Knjige.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
     print results
     return render_template('search_results.html', query=query, results=results, search=search)
+
+
 @main.route('/book_page/<book_id>', methods = ['POST', 'GET'])
 def book_page(book_id):
     post_form = PostForm()
@@ -403,6 +388,7 @@ def book_page(book_id):
                                autor_books=autor_books, posts=posts, post_form=post_form, item = book, author=author, picture=picture)
     else:
         abort(404)
+
 
 @main.route('/dashboard/<username>')
 @login_required
@@ -466,27 +452,38 @@ def unfilter(item):
 #         count += 1
 #         socketio.emit('my_response', {'data': 'Server generated event', 'count': count}, namespace='/test')
 
+#
+# @socketio.on('connect', namespace='/test')
+# def test_connect():
+#     # session['recive_count']=session.get('recive_count', 2)
+#     # emit('my_response', {'count': session['recive_count']})
+#     print "connected"
+#     print session.get('recive_count')
+#     print "connected"
+    # session['recive_count'] = session.get('recive_count',2)
+    # print session['recive_count']
+    # emit('my_response', {'count': session['recive_count']})
 
-@socketio.on('connect', namespace='/test')
-def test_connect():
-    print "connected"
     # global thread
     # if thread is None:
     #     thread = socketio.start_background_task(target=background_thread)
     #     emit('my_response', {'count': 0})
 
 
-# @socketio.on('connect', namespace='/test')
-# def test_connected():
-#     print "CONNECT"
-#     emit('my_response', {'data': 'Connected'})
+@socketio.on('connect', namespace='/test')
+def test_connected():
+    unread= Notification.check_unread(current_user._get_current_object())
+    print "Unread is ", unread
+    print "count is ", len(unread)
+    emit('conn_response', {'data': len(unread)})
 
 
 @socketio.on('my_event', namespace='/test')
 def test_message(message):
     print "EVENT ", message
-    session['recive_count'] = session.get('recive_count', 0)+1
-    emit('my_response', {'count': session['recive_count']})
+    session['recive_count'] = message
+    print "EVENT ", session['recive_count']
+    #emit('my_response', {'count': session['recive_count']})
 
 # @app.errorhandler(40Permissio4)
 # def page_not_found(e):

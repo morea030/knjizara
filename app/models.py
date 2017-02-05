@@ -3,20 +3,22 @@
 # inititalization python run.py db init
 # TODO zanrovi - implementirati pracenje i povezati sa sidebarom
 # TODO private messages
-# TODO knjizara.com
+# TODO knjizara.com ne funkcionise kako treba
 # cene knjiga
 import app
-from app import db
+from app import db, socketio
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as serializer
-from flask import current_app, request, url_for
+from flask import current_app, request, url_for,session
 from datetime import datetime
 import hashlib
 # from markdown import markdown
 import bleach
 import urllib2
+#
+from flask import copy_current_request_context
 from flask_sqlalchemy import before_models_committed
 # from slugify import slugify
 import flask_whooshalchemy as whooshalchemy
@@ -36,13 +38,11 @@ class FollowAuthors(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-
 class Knjige(db.Model):
     __tablename__ = "knjige"
     __searchable__ = ['naziv']
     id = db.Column(db.Integer, primary_key=True)
     naziv = db.Column(db.VARCHAR(256), )
-    #autor = db.Column(db.VARCHAR(256))
     autor = db.Column(db.Integer, db.ForeignKey('authors.id'))
     zanr = db.Column(db.VARCHAR(256))
     cene = db.relationship('Source', backref='naziv', lazy='dynamic')
@@ -53,6 +53,7 @@ class Knjige(db.Model):
 
     isbn = db.Column(db.VARCHAR(64))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow())
+
 
 class Source(db.Model):
     __tablename__ = "source"
@@ -66,9 +67,6 @@ class Source(db.Model):
     knjizara_sajt = db.Column(db.VARCHAR(128))
 
 
-
-
-
 class Authors(db.Model):
     __tablename__='authors'
     id = db.Column(db.Integer, primary_key=True)
@@ -80,6 +78,7 @@ class Authors(db.Model):
 
                                lazy='dynamic', cascade='all, delete-orphan')
 
+
 class Notification(db.Model):
     __tablename__ = "notifications"
     id = db.Column(db.Integer, primary_key=True)
@@ -89,16 +88,29 @@ class Notification(db.Model):
     flag=db.Column(db.VARCHAR(8)) # read or unread
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    @staticmethod
+    def check_unread(reciver):
+        print type(reciver)
+        if isinstance(reciver, long):
+            reciver=reciver
+        else:
+            reciver=reciver.id
+        print "CHECK UNREAD", reciver
+        unread_msgs = Notification.query.filter_by(reciver=reciver).all()
+        return unread_msgs
+
     def __commit_insert__(self):
 
-        unread_msgs=Notification.query.filter_by(reciver=self.reciver).all()
-        print unread_msgs, "reciver is ", self.reciver, self.flag, self.sender
+        unread_msgs=self.check_unread(self.reciver)
+
+        # session['recive_count'] = len(unread_msgs)
+        print "unread ", len(unread_msgs)
+        socketio.emit('my_response', {'data': len(unread_msgs)}, namespace='/test')
+
 
 @db.event.listens_for(Notification,'after_insert')
 def before_commit(mapper,connection, target):
     target.__commit_insert__()
-
-
 
 
 class Follow(db.Model):
@@ -153,7 +165,6 @@ class User(UserMixin,db.Model):
                 self.avatar_hash= hashlib.md5(self.email.encode('utf-8')).hexdigest()
             else:
                 self.avatar_hash = hashlib.md5(self.social_id.encode('utf-8')).hexdigest()
-
 
     @property
     def password(self):
@@ -353,8 +364,6 @@ class AnnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnnonymousUser
 
 
-
-
 class Post(db.Model):
     __tablename__='post'
 
@@ -373,8 +382,6 @@ class Post(db.Model):
     #     if not 'slug' in kwargs:
     #         kwargs['slug']=slugify(kwargs.get('title', ''))
 
-
-
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong',
@@ -383,9 +390,6 @@ class Post(db.Model):
         # or img tags alltogether
         target.body_html = bleach.linkify(bleach.clean(value,
                                                        tags = allowed_tags, attributes=attrs, protocols=['http', 'https'], strip=True))
-
-
-
 
     @staticmethod
     def generate_fake(count=100):
@@ -409,12 +413,13 @@ class Post(db.Model):
         return '<Post %r' % (self.body)
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
-#whooshalchemy.whoosh_index(app, Post)
+# whooshalchemy.whoosh_index(app, Post)
 
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
         return 'HEAD'
+
 
 def filter_src(name, value):
     print
@@ -427,6 +432,7 @@ def filter_src(name, value):
             print "TRUE"
             return True
 
+
 def image_type(url):
     valid_types = ('image/png', 'image/jpeg', 'image/gif', 'image/jpg')
     try:
@@ -438,7 +444,6 @@ def image_type(url):
         return False
     except:
         return False
-
 
 
 class Role(db.Model):
@@ -517,15 +522,11 @@ class Comment(db.Model):
         else:
             return count       
         return count      
-        
-
-
 
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
-#
-#
+
 @login_manager.user_loader
 def load_user(user_id):
 
