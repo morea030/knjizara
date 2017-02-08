@@ -95,21 +95,21 @@ class Notification(db.Model):
             reciver=reciver
         else:
             reciver=reciver.id
-        print "CHECK UNREAD", reciver
+        #print "CHECK UNREAD", reciver
         unread_msgs = Notification.query.filter_by(reciver=reciver).all()
         return unread_msgs
 
     def __commit_insert__(self):
 
         unread_msgs=self.check_unread(self.reciver)
-
+        room = "user_{}".format(self.reciver)
         # session['recive_count'] = len(unread_msgs)
-        print "unread ", len(unread_msgs)
-        socketio.emit('my_response', {'data': len(unread_msgs)}, namespace='/test')
+        #print "unread ", len(unread_msgs)
+        socketio.emit('my_response', {'data': len(unread_msgs)}, namespace='/test', room=room)
 
 
 @db.event.listens_for(Notification,'after_insert')
-def before_commit(mapper,connection, target):
+def before_commit(mapper, connection, target):
     target.__commit_insert__()
 
 

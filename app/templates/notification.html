@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{# TODO check how to send function args via ajax #}
+{% block page_content %}
+    <script type="text/javascript">
+        $(function(){
+            $('.button').each(function(){
+                console.log("hitting");
+                $(this).click(function(){
+                    var id_ = $(this).attr('id');
+                    console.log(id_);
+                    $.ajax({
+                        url:$SCRIPT_ROOT + '/read_notif',
+                        data: {id_:id_},
+                        type:"POST",
+                        success: function(response) {
+                        console.log(response);
+                        console.log(response.result);
+
+                        $('#'+id_).text('read');
+                        $('#notification_'+response.result).attr('style', 'background-color: white');
+            }
+                })
+                        }
+                );
+            })
+                }
+        )
+    </script>
+    <div class="container">
+        <ul>
+{% for notification in notifications %}
+
+
+<li id="notification_{{ notification.id }}" style="background-color:#a5a2a2;border-radius: 9px;"> <div class="profile-thumbnail">
+        <a href="{{ url_for('.user', username=notification.issuer.username) }}">
+            <img class="img-rounded profile-thumbnail" style=" width: 40px; height: 40px;padding-left: 5px; padding-top:5px;"
+                 src="{{ notification.issuer.gravatar(size=40) }}">
+        </a>
+    </div>
+    <div class="post-date">{{ moment(notification.timestamp).fromNow(refresh=True) }}</div>
+    <div class="post-author">
+        <a href="{{ url_for('.user', username=notification.issuer.username) }}">
+            {{ notification.issuer.username }}
+        </a>
+    </div>
+    <div class="post-body">{{ notification.type }}-ed your {{ notification.type }}
+        {% if notification.flag == "Unread" %}
+         <span class="label label-danger" style="float: right; margin-right:10px; "><button type="button" class="button" id="{{ notification.id }}">{{ notification.flag }}</button></span>
+        {% else %}
+        <span class="label label-primary" >{{ notification.flag }}</span>
+        {% endif %}
+
+    </div>
+<script type="text/javascript">
+     $(document).ready(function(){
+     var status = "{{ notification.flag }}";
+     if(status === "read"){
+         $('#notification_{{ notification.id }}').attr('style', 'background-color: white');}
+     else {
+         console.log('{{ notification.flag }}');}
+        // do other stuff here
+     })
+  </script>
+</li>
+<hr>
+
+{% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}

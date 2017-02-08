@@ -1,7 +1,7 @@
 # not covered in book https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n
 from . import main
 from ..mail import send_mail
-from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g, session
+from flask import render_template, flash, redirect, request, abort, url_for, current_app, make_response, g, session, jsonify
 from datetime import datetime
 from ..models import User, Role, Permission, Post, Comment, Knjige, Source, Authors, Notification
 from flask_login import login_required, current_user
@@ -14,7 +14,7 @@ import  os
 import random
 
 # from run import socketio
-from flask_socketio import emit
+from flask_socketio import emit, join_room
 #from config import MAX_SEARCH_RESULTS
 MAX_SEARCH_RESULTS = 50
 thread=None
@@ -27,6 +27,7 @@ def index():
     search_form = SearchForm()
     books = Knjige.query.order_by(Knjige.timestamp.desc()).limit(6)
     posts = Post.query.order_by(Post.timestamp.desc()).limit(6)
+    request.script_root = url_for('.index', _external=True)
     return render_template("index.html", search_form=search_form, current_time=datetime.utcnow(), books=books, posts=posts, async_mode=socketio.async_mode)
 
 
@@ -186,7 +187,7 @@ def edit(id):
 @login_required
 @permission_required(Permission.FOLLOW)
 def follow(type, name):
-    #print type, name
+    # print type, name
     if type == 'user':
         user = User.query.filter_by(username=name).first()
         if user is None:
@@ -211,7 +212,7 @@ def follow(type, name):
             return redirect(request.referrer)
         current_user.follow(item, 'item')
         flash('You are now following %s' % name)
-    elif  type =='author':
+    elif type =='author':
         author = Authors.query.filter_by(name=name).first()
         if author is None:
             flash('invalid %s' % type)
@@ -363,6 +364,7 @@ def search_result(query):
 
 @main.route('/book_page/<book_id>', methods = ['POST', 'GET'])
 def book_page(book_id):
+
     post_form = PostForm()
     book = Knjige.query.filter_by(id=book_id).first()
     print "Data is ", post_form.body.data
@@ -471,18 +473,25 @@ def unfilter(item):
 
 
 @socketio.on('connect', namespace='/test')
+@login_required
 def test_connected():
     unread= Notification.check_unread(current_user._get_current_object())
-    print "Unread is ", unread
-    print "count is ", len(unread)
-    emit('conn_response', {'data': len(unread)})
+    #print "Unread is ", unread
+    #print "count is ", len(unread)
+    room = 'user_{}'.format(current_user._get_current_object().id)
+    #print room
+    join_room(room)
+
+
+    emit('conn_response', {'data': len(unread)}, room=room)
 
 
 @socketio.on('my_event', namespace='/test')
+@login_required
 def test_message(message):
-    print "EVENT ", message
+    #print "EVENT ", message
     session['recive_count'] = message
-    print "EVENT ", session['recive_count']
+    #print "EVENT ", session['recive_count']
     #emit('my_response', {'count': session['recive_count']})
 
 # @app.errorhandler(40Permissio4)
@@ -494,3 +503,22 @@ def test_message(message):
 # @app.errorhandler(500)
 # def internal_server_error(e):
 #     return render_template('500.html'), .add500
+@main.route('/user/<user_id>/notifications')
+@login_required
+def user_notifications(user_id):
+    request.script_root = url_for('.user_notifications', user_id=user_id, _external=True)
+    notifications = Notification.query.filter_by(reciver=user_id).all()
+    print "Notifications are ",notifications
+    return render_template('notification.html', notifications=notifications)
+
+
+@main.route('/user/<user_id>/notifications/read_notif',  methods=['POST'])
+def read_notifications(user_id):
+
+    not_id = request.form.get('id_')
+    notification=Notification.query.filter_by(id=not_id).first()
+    notification.flag='read'
+    db.session.add(notification)
+    print "ID is ", not_id
+
+    return jsonify(result=not_id)

@@ -3,6 +3,7 @@
 {% import "_macros.html" as macros %}
 
 {% block page_content %}
+    {{ request.script_root|tojson|safe }}
 <div class="row">
 <div class="col-sm-7">
 <div class="post-tabs">

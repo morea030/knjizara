@@ -59,6 +59,11 @@
         });
         })
 </script>
+<script type=text/javascript>
+   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  console.log($SCRIPT_ROOT+'/all');
+   console.log("HELLO")
+</script>
 </head>
 <body style="background-image: url({{url_for('static', filename='img/library2.jpg')}})">
 {% block navbar %}
@@ -81,7 +86,7 @@
         <ul class="nav navbar-nav">
           <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
           <li><a href="#">Link</a></li>
-            <li><i class="fa fa-bell" aria-hidden="true" id="notify" data-badge="0" style="padding: 15px; position:relative;"></i></li>
+            <li><a href="{{ url_for('main.user_notifications', user_id=current_user.id) }}"><i class="fa fa-bell" aria-hidden="true" id="notify" data-badge="0" style="padding: 15px; position:relative;"></i></a></li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
             <ul class="dropdown-menu">
@@ -164,7 +169,7 @@
 
 {#<div class="container">#}
 {% block content %}
-
+{{ request.script_root|tojson|safe }}
 {% for message in get_flashed_messages() %}
     <div class="container">
     <div class = "alert alert-warning">
