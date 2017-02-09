@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
-{# TODO check how to send function args via ajax #}
+
 {% block page_content %}
     <script type="text/javascript">
         $(function(){
             $('.button').each(function(){
                 console.log("hitting");
+
                 $(this).click(function(){
                     var id_ = $(this).attr('id');
                     console.log(id_);
+                    var csrftoken="{{ csrf_token() }}";
+                    $.ajaxSetup({
+                        beforeSend: function(xhr, settings) {
+                            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken)
+        }
+    }
+});
                     $.ajax({
                         url:$SCRIPT_ROOT + '/read_notif',
                         data: {id_:id_},
@@ -18,6 +27,41 @@
 
                         $('#'+id_).text('read');
                         $('#notification_'+response.result).attr('style', 'background-color: white');
+                        $('#'+id_).prop('disabled', true);
+
+            }
+                })
+                        }
+                );
+            })
+                }
+        )
+    </script>
+<script type="text/javascript">
+        $(function(){
+            $('.not-link').each(function(){
+                console.log("yippi ka ye");
+
+                $(this).click(function(){
+                    var id_ = $(this).attr('id');
+                    console.log(id_);
+                    var csrftoken="{{ csrf_token() }}";
+                    $.ajaxSetup({
+                        beforeSend: function(xhr, settings) {
+                            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken)
+        }
+    }
+});
+                    $.ajax({
+                        url:$SCRIPT_ROOT + '/read_notif',
+                        data: {id_:id_},
+                        type:"POST",
+                        success: function(response) {
+                        console.log(response);
+                        console.log(response.result);
+
+
             }
                 })
                         }
@@ -43,9 +87,9 @@
             {{ notification.issuer.username }}
         </a>
     </div>
-    <div class="post-body">{{ notification.type }}-ed your {{ notification.type }}
+    <div class="post-body"><a href="{{ url_for('.post', id=notification.post_id, _anchor=notification.comment_id)}}" class="not-link" id="{{ notification.id }}"> {{ notification.type }}-ed your {{ notification.type }} {{ notification.timestamp }}</a>
         {% if notification.flag == "Unread" %}
-         <span class="label label-danger" style="float: right; margin-right:10px; "><button type="button" class="button" id="{{ notification.id }}">{{ notification.flag }}</button></span>
+         <button type="button" class="button" id="{{ notification.id }}">{{ notification.flag }}</button>
         {% else %}
         <span class="label label-primary" >{{ notification.flag }}</span>
         {% endif %}
@@ -53,6 +97,8 @@
     </div>
 <script type="text/javascript">
      $(document).ready(function(){
+     var csrf_token="{{ csrf_token() }}";
+         console.log(csrf_token);
      var status = "{{ notification.flag }}";
      if(status === "read"){
          $('#notification_{{ notification.id }}').attr('style', 'background-color: white');}

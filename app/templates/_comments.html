@@ -2,7 +2,7 @@
 <ul class="comments">
 	{% for comment in comments recursive %}
 
-	<li class="comment">
+	<li class="comment" id="{{ comment.id }}">
 		<div class="comment-thumbnail">
 			<a href="{{url_for('.user', username=comment.author.username)}}">
 				<img class="img-rounded profile-thumbnail"  style="width: 40px; height: 40px" src="{{comment.author.gravatar()}}"></a>

@@ -129,6 +129,12 @@ def upload():
 
 @main.route('/post/<int:id>', methods=['GET','POST'])
 def post(id):
+    if request.referrer and "notification" in request.referrer:
+        print "we come from "
+
+    else:
+        print request.referrer
+        print "we dont come from"
     post = Post.query.get_or_404(id)
     form = CommentForm()
     if form.validate_on_submit():
@@ -158,9 +164,12 @@ def comment(id):
         print "COMMENT VIEW"
         comment = Comment(body=form.body.data, post=post, author = current_user._get_current_object(), parrent_id=parrent_comment.id)
         db.session.add(comment)
-        print "COMMENT IS ", comment, "and name is ", comment.author.id
-        notification = Notification(sender=comment.author.id, reciver= parrent_comment.author_id, type='Cooment', flag='Unread' )
+        db.session.flush()
+        print "COMMENT IS ", comment, "and name is ", comment.author.id, comment.id
+        notification = Notification(sender=comment.author.id, reciver= parrent_comment.author_id, type='Cooment', flag='Unread', comment_id =comment.id , post_id=post.id)
         db.session.add(notification)
+
+        print " Comments is ", comment, comment.author.id, comment.id
         flash('Your comment has been added')
         return redirect(url_for('.post', id=post.id))
 
@@ -507,18 +516,27 @@ def test_message(message):
 @login_required
 def user_notifications(user_id):
     request.script_root = url_for('.user_notifications', user_id=user_id, _external=True)
-    notifications = Notification.query.filter_by(reciver=user_id).all()
+    notifications = Notification.query.filter_by(reciver=user_id).order_by(Notification.timestamp.desc()).all()
     print "Notifications are ",notifications
     return render_template('notification.html', notifications=notifications)
 
 
 @main.route('/user/<user_id>/notifications/read_notif',  methods=['POST'])
+@login_required
 def read_notifications(user_id):
+    """This function is used when we make notification read by clicking a button(ajax call)"""
+    if current_user.id != int(user_id):
+        abort(403)
 
     not_id = request.form.get('id_')
     notification=Notification.query.filter_by(id=not_id).first()
     notification.flag='read'
     db.session.add(notification)
     print "ID is ", not_id
-
+    print "HEADER read not  ", request.headers.get('X-CSRFToken')
+    unread_msgs= Notification.check_unread(current_user._get_current_object())
+    room =  "user_{}".format(user_id)
+    print "Msgs and room are ", unread_msgs, room
+    socketio.emit('my_response', {'data': len(unread_msgs)}, namespace='/test', room=room)
     return jsonify(result=not_id)
+

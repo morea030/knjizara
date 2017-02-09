@@ -86,7 +86,10 @@ class Notification(db.Model):
     reciver = db.Column(db.Integer, db.ForeignKey('user.id'))
     type = db.Column(db.VARCHAR(36)) # upvote, downvote, private message, commented comment ...
     flag=db.Column(db.VARCHAR(8)) # read or unread
+    comment_id = db.Column(db.Integer)
+    post_id = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 
     @staticmethod
     def check_unread(reciver):
@@ -96,7 +99,7 @@ class Notification(db.Model):
         else:
             reciver=reciver.id
         #print "CHECK UNREAD", reciver
-        unread_msgs = Notification.query.filter_by(reciver=reciver).all()
+        unread_msgs = Notification.query.filter_by(reciver=reciver, flag='Unread').all()
         return unread_msgs
 
     def __commit_insert__(self):

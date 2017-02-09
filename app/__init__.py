@@ -10,6 +10,7 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_pagedown import PageDown
 import flask_whooshalchemy as whooshalchemy
 from flask_socketio import SocketIO
+from flask_wtf.csrf import CsrfProtect
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -23,7 +24,7 @@ photos = UploadSet('photos', IMAGES)
 pagedown = PageDown()
 socketio = SocketIO()
 async_mode=None
-
+csfr =CsrfProtect()
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -39,6 +40,7 @@ def create_app(config_name):
     configure_uploads(app, photos)
     pagedown.init_app(app)
     socketio.init_app(app, async_mode=async_mode)
+    csfr.init_app(app)
     from models import Knjige
     whooshalchemy.whoosh_index(app, Knjige)
 
